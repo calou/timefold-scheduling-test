@@ -9,7 +9,6 @@ import ai.timefold.solver.core.api.domain.solution.ProblemFactCollectionProperty
 import ai.timefold.solver.core.api.domain.valuerange.ValueRangeProvider;
 import ai.timefold.solver.core.api.score.buildin.hardsoft.HardSoftScore;
 import ai.timefold.solver.core.api.solver.SolverStatus;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,7 +24,7 @@ public class Timetable {
     @Getter
     @ProblemFactCollectionProperty
     @ValueRangeProvider
-    private List<Timeslot> timeslots;
+    private List<Shift> shifts;
 
     @Getter
     @ProblemFactCollectionProperty
@@ -52,9 +51,9 @@ public class Timetable {
         this.solverStatus = solverStatus;
     }
 
-    public Timetable(String name, List<Timeslot> timeslots, List<Room> rooms, List<Lesson> lessons) {
+    public Timetable(String name, List<Shift> shifts, List<Room> rooms, List<Lesson> lessons) {
         this.name = name;
-        this.timeslots = timeslots;
+        this.shifts = shifts;
         this.rooms = rooms;
         this.lessons = lessons;
     }

@@ -117,7 +117,7 @@ function renderSchedule(timetable) {
 
   const theadByRoom = $("<thead>").appendTo(timetableByRoom);
   const headerRowByRoom = $("<tr>").appendTo(theadByRoom);
-  headerRowByRoom.append($("<th>Timeslot</th>"));
+  headerRowByRoom.append($("<th>Shift</th>"));
 
   $.each(timetable.rooms, (index, room) => {
     headerRowByRoom
@@ -127,7 +127,7 @@ function renderSchedule(timetable) {
   });
   const theadByTeacher = $("<thead>").appendTo(timetableByTeacher);
   const headerRowByTeacher = $("<tr>").appendTo(theadByTeacher);
-  headerRowByTeacher.append($("<th>Timeslot</th>"));
+  headerRowByTeacher.append($("<th>Shift</th>"));
   const teachers = [...new Set(timetable.lessons.map(lesson => lesson.teacher))];
   $.each(teachers, (index, teacher) => {
     headerRowByTeacher
@@ -136,7 +136,7 @@ function renderSchedule(timetable) {
   });
   const theadByStudentGroup = $("<thead>").appendTo(timetableByStudentGroup);
   const headerRowByStudentGroup = $("<tr>").appendTo(theadByStudentGroup);
-  headerRowByStudentGroup.append($("<th>Timeslot</th>"));
+  headerRowByStudentGroup.append($("<th>Shift</th>"));
   const studentGroups = [...new Set(timetable.lessons.map(lesson => lesson.studentGroup))];
   $.each(studentGroups, (index, studentGroup) => {
     headerRowByStudentGroup
@@ -150,44 +150,44 @@ function renderSchedule(timetable) {
 
   const LocalTime = JSJoda.LocalTime;
 
-  $.each(timetable.timeslots, (index, timeslot) => {
+  $.each(timetable.shifts, (index, shift) => {
     const rowByRoom = $("<tr>").appendTo(tbodyByRoom);
     rowByRoom
       .append($(`<th class="align-middle"/>`)
         .append($("<span/>").text(`
-                    ${timeslot.dayOfWeek.charAt(0) + timeslot.dayOfWeek.slice(1).toLowerCase()}
-                    ${LocalTime.parse(timeslot.startTime).format(dateTimeFormatter)}
+                    ${shift.dayOfWeek.charAt(0) + shift.dayOfWeek.slice(1).toLowerCase()}
+                    ${LocalTime.parse(shift.startTime).format(dateTimeFormatter)}
                     -
-                    ${LocalTime.parse(timeslot.endTime).format(dateTimeFormatter)}
+                    ${LocalTime.parse(shift.endTime).format(dateTimeFormatter)}
                 `)));
     $.each(timetable.rooms, (index, room) => {
-      rowByRoom.append($("<td/>").prop("id", `timeslot${timeslot.id}room${room.id}`));
+      rowByRoom.append($("<td/>").prop("id", `shift${shift.id}room${room.id}`));
     });
 
     const rowByTeacher = $("<tr>").appendTo(tbodyByTeacher);
     rowByTeacher
       .append($(`<th class="align-middle"/>`)
         .append($("<span/>").text(`
-                    ${timeslot.dayOfWeek.charAt(0) + timeslot.dayOfWeek.slice(1).toLowerCase()}
-                    ${LocalTime.parse(timeslot.startTime).format(dateTimeFormatter)}
+                    ${shift.dayOfWeek.charAt(0) + shift.dayOfWeek.slice(1).toLowerCase()}
+                    ${LocalTime.parse(shift.startTime).format(dateTimeFormatter)}
                     -
-                    ${LocalTime.parse(timeslot.endTime).format(dateTimeFormatter)}
+                    ${LocalTime.parse(shift.endTime).format(dateTimeFormatter)}
                 `)));
     $.each(teachers, (index, teacher) => {
-      rowByTeacher.append($("<td/>").prop("id", `timeslot${timeslot.id}teacher${convertToId(teacher)}`));
+      rowByTeacher.append($("<td/>").prop("id", `shift${shift.id}teacher${convertToId(teacher)}`));
     });
 
     const rowByStudentGroup = $("<tr>").appendTo(tbodyByStudentGroup);
     rowByStudentGroup
       .append($(`<th class="align-middle"/>`)
         .append($("<span/>").text(`
-                    ${timeslot.dayOfWeek.charAt(0) + timeslot.dayOfWeek.slice(1).toLowerCase()}
-                    ${LocalTime.parse(timeslot.startTime).format(dateTimeFormatter)}
+                    ${shift.dayOfWeek.charAt(0) + shift.dayOfWeek.slice(1).toLowerCase()}
+                    ${LocalTime.parse(shift.startTime).format(dateTimeFormatter)}
                     -
-                    ${LocalTime.parse(timeslot.endTime).format(dateTimeFormatter)}
+                    ${LocalTime.parse(shift.endTime).format(dateTimeFormatter)}
                 `)));
     $.each(studentGroups, (index, studentGroup) => {
-      rowByStudentGroup.append($("<td/>").prop("id", `timeslot${timeslot.id}studentGroup${convertToId(studentGroup)}`));
+      rowByStudentGroup.append($("<td/>").prop("id", `shift${shift.id}studentGroup${convertToId(studentGroup)}`));
     });
   });
 
@@ -200,13 +200,13 @@ function renderSchedule(timetable) {
           .append($(`<em/>`).text(`by ${lesson.teacher}`)))
         .append($(`<small class="ms-2 mt-1 card-text text-muted align-bottom float-end"/>`).text(lesson.id))
         .append($(`<p class="card-text ms-2"/>`).text(lesson.studentGroup)));
-    if (lesson.timeslot == null || lesson.room == null) {
+    if (lesson.shift == null || lesson.room == null) {
       unassignedLessons.append($(`<div class="col"/>`).append(lessonElement));
     } else {
-      // In the JSON, the lesson.timeslot and lesson.room are only IDs of these objects.
-      $(`#timeslot${lesson.timeslot}room${lesson.room}`).append(lessonElement.clone());
-      $(`#timeslot${lesson.timeslot}teacher${convertToId(lesson.teacher)}`).append(lessonElement.clone());
-      $(`#timeslot${lesson.timeslot}studentGroup${convertToId(lesson.studentGroup)}`).append(lessonElement.clone());
+      // In the JSON, the lesson.shift and lesson.room are only IDs of these objects.
+      $(`#shift${lesson.shift}room${lesson.room}`).append(lessonElement.clone());
+      $(`#shift${lesson.shift}teacher${convertToId(lesson.teacher)}`).append(lessonElement.clone());
+      $(`#shift${lesson.shift}studentGroup${convertToId(lesson.studentGroup)}`).append(lessonElement.clone());
     }
   });
 }

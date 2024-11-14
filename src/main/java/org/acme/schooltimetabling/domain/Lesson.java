@@ -23,7 +23,7 @@ public class Lesson {
 
     @JsonIdentityReference
     @PlanningVariable
-    private Timeslot timeslot;
+    private Shift shift;
 
     @JsonIdentityReference
     @PlanningVariable
@@ -36,9 +36,9 @@ public class Lesson {
         this.studentGroup = studentGroup;
     }
 
-    public Lesson(String id, String subject, String teacher, String studentGroup, Timeslot timeslot, Room room) {
+    public Lesson(String id, String subject, String teacher, String studentGroup, Shift shift, Room room) {
         this(id, subject, teacher, studentGroup);
-        this.timeslot = timeslot;
+        this.shift = shift;
         this.room = room;
     }
 

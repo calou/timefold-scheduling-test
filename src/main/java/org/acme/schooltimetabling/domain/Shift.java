@@ -13,8 +13,8 @@ import lombok.ToString;
 @Data
 @ToString(of = { "dayOfWeek", "startTime" })
 @NoArgsConstructor
-@JsonIdentityInfo(scope = Timeslot.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Timeslot {
+@JsonIdentityInfo(scope = Shift.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class Shift {
 
     @PlanningId
     private String id;
@@ -23,14 +23,14 @@ public class Timeslot {
     private LocalTime startTime;
     private LocalTime endTime;
 
-    public Timeslot(String id, DayOfWeek dayOfWeek, LocalTime startTime, LocalTime endTime) {
+    public Shift(String id, DayOfWeek dayOfWeek, LocalTime startTime, LocalTime endTime) {
         this.id = id;
         this.dayOfWeek = dayOfWeek;
         this.startTime = startTime;
         this.endTime = endTime;
     }
 
-    public Timeslot(String id, DayOfWeek dayOfWeek, LocalTime startTime) {
+    public Shift(String id, DayOfWeek dayOfWeek, LocalTime startTime) {
         this(id, dayOfWeek, startTime, startTime.plusMinutes(50));
     }
 
