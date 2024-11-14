@@ -1,5 +1,6 @@
 package org.acme.schooltimetabling.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import ai.timefold.solver.core.api.domain.entity.PlanningEntity;
 import ai.timefold.solver.core.api.domain.lookup.PlanningId;
@@ -21,10 +22,12 @@ public class Session {
     private String teacher;
     private String studentGroup;
 
+    @JsonProperty("shift_id")
     @JsonIdentityReference
     @PlanningVariable
     private Shift shift;
 
+    @JsonProperty("beamline_id")
     @JsonIdentityReference
     @PlanningVariable
     private Beamline beamline;

@@ -21,8 +21,8 @@ public class TimetableConstraintProvider implements ConstraintProvider {
             studentGroupConflict(constraintFactory),
             // Soft constraints
             teacherBeamlineStability(constraintFactory),
-            teacherTimeEfficiency(constraintFactory),
-            studentGroupSubjectVariety(constraintFactory)
+            teacherTimeEfficiency(constraintFactory)//,
+            //studentGroupSubjectVariety(constraintFactory)
         };
     }
 
@@ -75,7 +75,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         return constraintFactory
                 .forEach(Session.class)
                 .join(Session.class, Joiners.equal(Session::getTeacher),
-                      Joiners.equal((session) -> session.getShift().getDayOfWeek()))
+                      Joiners.equal((session) -> session.getShift().getDate()))
                 .filter((session1, session2) -> {
                     Duration between = Duration.between(session1.getShift().getEndTime(),
                                                         session2.getShift().getStartTime());
@@ -85,6 +85,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                 .asConstraint("Teacher time efficiency");
     }
 
+    /*
     Constraint studentGroupSubjectVariety(ConstraintFactory constraintFactory) {
         // A student group dislikes sequential lessons on the same subject.
         return constraintFactory
@@ -92,7 +93,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                 .join(Session.class,
                       Joiners.equal(Session::getSubject),
                       Joiners.equal(Session::getStudentGroup),
-                      Joiners.equal((session) -> session.getShift().getDayOfWeek()))
+                      Joiners.equal((session) -> session.getShift().getDate()))
                 .filter((session1, session2) -> {
                     Duration between = Duration.between(session1.getShift().getEndTime(),
                                                         session2.getShift().getStartTime());
@@ -101,5 +102,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                 .penalize(HardSoftScore.ONE_SOFT)
                 .asConstraint("Student group subject variety");
     }
+
+     */
 
 }

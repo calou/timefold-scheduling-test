@@ -1,6 +1,7 @@
 package org.acme.schooltimetabling.rest;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,35 +53,15 @@ public class TimetableDemoResource {
     @Path("/{demoDataId}")
     public Response generate(@Parameter(description = "Unique identifier of the demo data.",
             required = true) @PathParam("demoDataId") DemoData demoData) {
-        List<Shift> shifts = new ArrayList<>(10);
-        long nextTimeslotId = 0L;
-        shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.MONDAY, LocalTime.of(8, 30), LocalTime.of(9, 30)));
-        shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.MONDAY, LocalTime.of(9, 30), LocalTime.of(10, 30)));
-        shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.MONDAY, LocalTime.of(10, 30), LocalTime.of(11, 30)));
-        shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.MONDAY, LocalTime.of(13, 30), LocalTime.of(14, 30)));
-        shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.MONDAY, LocalTime.of(14, 30), LocalTime.of(15, 30)));
+        List<Shift> shifts = new ArrayList<>(270);
 
-        shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.TUESDAY, LocalTime.of(8, 30), LocalTime.of(9, 30)));
-        shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.TUESDAY, LocalTime.of(9, 30), LocalTime.of(10, 30)));
-        shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.TUESDAY, LocalTime.of(10, 30), LocalTime.of(11, 30)));
-        shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.TUESDAY, LocalTime.of(13, 30), LocalTime.of(14, 30)));
-        shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.TUESDAY, LocalTime.of(14, 30), LocalTime.of(15, 30)));
-        if (demoData == DemoData.LARGE) {
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.WEDNESDAY, LocalTime.of(8, 30), LocalTime.of(9, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.WEDNESDAY, LocalTime.of(9, 30), LocalTime.of(10, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.WEDNESDAY, LocalTime.of(10, 30), LocalTime.of(11, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.WEDNESDAY, LocalTime.of(13, 30), LocalTime.of(14, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.WEDNESDAY, LocalTime.of(14, 30), LocalTime.of(15, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.THURSDAY, LocalTime.of(8, 30), LocalTime.of(9, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.THURSDAY, LocalTime.of(9, 30), LocalTime.of(10, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.THURSDAY, LocalTime.of(10, 30), LocalTime.of(11, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.THURSDAY, LocalTime.of(13, 30), LocalTime.of(14, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.THURSDAY, LocalTime.of(14, 30), LocalTime.of(15, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.FRIDAY, LocalTime.of(8, 30), LocalTime.of(9, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.FRIDAY, LocalTime.of(9, 30), LocalTime.of(10, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.FRIDAY, LocalTime.of(10, 30), LocalTime.of(11, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.FRIDAY, LocalTime.of(13, 30), LocalTime.of(14, 30)));
-            shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.FRIDAY, LocalTime.of(14, 30), LocalTime.of(15, 30)));
+        for (long i = 0; i < 90L; i++) {
+            var date = LocalDate.now().plusDays(i);
+            shifts.addAll(List.of(
+               new Shift(date, 0),
+               new Shift(date, 1),
+               new Shift(date, 2)
+            ));
         }
 
         List<Beamline> beamlines = new ArrayList<>(3);

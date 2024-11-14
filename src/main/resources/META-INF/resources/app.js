@@ -102,16 +102,22 @@ function refreshSchedule() {
     });
 }
 
+function sanitizeForId(idPart){
+  return idPart.replaceAll("/", "__");
+}
+
+function toHtmlId(shift_id, beamline_id) {
+  return `shift-${sanitizeForId(shift_id)}___beamline-${sanitizeForId(beamline_id)}`;
+}
+
 function renderSchedule(timetable) {
+console.log("renderSchedule")
   refreshSolvingButtons(timetable.solverStatus != null && timetable.solverStatus !== "NOT_SOLVING");
   $("#score").text("Score: " + (timetable.score == null ? "?" : timetable.score));
 
   const timetableByBeamline = $("#timetableByBeamline");
   timetableByBeamline.children().remove();
-  const timetableByTeacher = $("#timetableByTeacher");
-  timetableByTeacher.children().remove();
-  const timetableByStudentGroup = $("#timetableByStudentGroup");
-  timetableByStudentGroup.children().remove();
+
   const unassignedSessions = $("#unassignedSessions");
   unassignedSessions.children().remove();
 
@@ -119,79 +125,28 @@ function renderSchedule(timetable) {
   const headerRowByBeamline = $("<tr>").appendTo(theadByBeamline);
   headerRowByBeamline.append($("<th>Shift</th>"));
 
-  $.each(timetable.beamlines, (index, beamline) => {
-    headerRowByBeamline
-      .append($("<th/>")
-        .append($("<span/>").text(beamline.name))
-        .append($(`<button type="button" class="ms-2 mb-1 btn btn-light btn-sm p-1"/>`)));
-  });
-  const theadByTeacher = $("<thead>").appendTo(timetableByTeacher);
-  const headerRowByTeacher = $("<tr>").appendTo(theadByTeacher);
-  headerRowByTeacher.append($("<th>Shift</th>"));
-  const teachers = [...new Set(timetable.sessions.map(session => session.teacher))];
-  $.each(teachers, (index, teacher) => {
-    headerRowByTeacher
-      .append($("<th/>")
-        .append($("<span/>").text(teacher)));
-  });
-  const theadByStudentGroup = $("<thead>").appendTo(timetableByStudentGroup);
-  const headerRowByStudentGroup = $("<tr>").appendTo(theadByStudentGroup);
-  headerRowByStudentGroup.append($("<th>Shift</th>"));
-  const studentGroups = [...new Set(timetable.sessions.map(session => session.studentGroup))];
-  $.each(studentGroups, (index, studentGroup) => {
-    headerRowByStudentGroup
-      .append($("<th/>")
-        .append($("<span/>").text(studentGroup)));
+  $.each(timetable.beamlines, (_, beamline) => {
+    headerRowByBeamline.append($("<th/>")
+                       .append($("<span/>").text(beamline.name))
+                       .append($(`<button type="button" class="ms-2 mb-1 btn btn-light btn-sm p-1"/>`)));
   });
 
   const tbodyByBeamline = $("<tbody>").appendTo(timetableByBeamline);
-  const tbodyByTeacher = $("<tbody>").appendTo(timetableByTeacher);
-  const tbodyByStudentGroup = $("<tbody>").appendTo(timetableByStudentGroup);
 
   const LocalTime = JSJoda.LocalTime;
 
-  $.each(timetable.shifts, (index, shift) => {
+  $.each(timetable.shifts, (_, shift) => {
     const rowByBeamline = $("<tr>").appendTo(tbodyByBeamline);
     rowByBeamline
       .append($(`<th class="align-middle"/>`)
-        .append($("<span/>").text(`
-                    ${shift.dayOfWeek.charAt(0) + shift.dayOfWeek.slice(1).toLowerCase()}
-                    ${LocalTime.parse(shift.startTime).format(dateTimeFormatter)}
-                    -
-                    ${LocalTime.parse(shift.endTime).format(dateTimeFormatter)}
-                `)));
-    $.each(timetable.beamlines, (index, beamline) => {
-      rowByBeamline.append($("<td/>").prop("id", `shift${shift.id}beamline${beamline.id}`));
+        .append($("<span/>").text(shift.id)));
+    $.each(timetable.beamlines, (_, beamline) => {
+      rowByBeamline.append($("<td/>").prop("id", toHtmlId(shift.id, beamline.id)));
     });
 
-    const rowByTeacher = $("<tr>").appendTo(tbodyByTeacher);
-    rowByTeacher
-      .append($(`<th class="align-middle"/>`)
-        .append($("<span/>").text(`
-                    ${shift.dayOfWeek.charAt(0) + shift.dayOfWeek.slice(1).toLowerCase()}
-                    ${LocalTime.parse(shift.startTime).format(dateTimeFormatter)}
-                    -
-                    ${LocalTime.parse(shift.endTime).format(dateTimeFormatter)}
-                `)));
-    $.each(teachers, (index, teacher) => {
-      rowByTeacher.append($("<td/>").prop("id", `shift${shift.id}teacher${convertToId(teacher)}`));
-    });
-
-    const rowByStudentGroup = $("<tr>").appendTo(tbodyByStudentGroup);
-    rowByStudentGroup
-      .append($(`<th class="align-middle"/>`)
-        .append($("<span/>").text(`
-                    ${shift.dayOfWeek.charAt(0) + shift.dayOfWeek.slice(1).toLowerCase()}
-                    ${LocalTime.parse(shift.startTime).format(dateTimeFormatter)}
-                    -
-                    ${LocalTime.parse(shift.endTime).format(dateTimeFormatter)}
-                `)));
-    $.each(studentGroups, (index, studentGroup) => {
-      rowByStudentGroup.append($("<td/>").prop("id", `shift${shift.id}studentGroup${convertToId(studentGroup)}`));
-    });
   });
 
-  $.each(timetable.sessions, (index, session) => {
+  $.each(timetable.sessions, (_, session) => {
     const color = pickColor(session.subject);
     const sessionElement = $(`<div class="card" style="background-color: ${color}"/>`)
       .append($(`<div class="card-body p-2"/>`)
@@ -200,13 +155,11 @@ function renderSchedule(timetable) {
           .append($(`<em/>`).text(`by ${session.teacher}`)))
         .append($(`<small class="ms-2 mt-1 card-text text-muted align-bottom float-end"/>`).text(session.id))
         .append($(`<p class="card-text ms-2"/>`).text(session.studentGroup)));
-    if (session.shift == null || session.beamline == null) {
+    if (session.shift_id == null || session.beamline_id == null) {
       unassignedSessions.append($(`<div class="col"/>`).append(sessionElement));
     } else {
       // In the JSON, the session.shift and session.beamline are only IDs of these objects.
-      $(`#shift${session.shift}beamline${session.beamline}`).append(sessionElement.clone());
-      $(`#shift${session.shift}teacher${convertToId(session.teacher)}`).append(sessionElement.clone());
-      $(`#shift${session.shift}studentGroup${convertToId(session.studentGroup)}`).append(sessionElement.clone());
+      $(`#${toHtmlId(session.shift_id, session.beamline_id)}`).append(sessionElement.clone());
     }
   });
 }
