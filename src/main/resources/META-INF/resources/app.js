@@ -112,8 +112,8 @@ function renderSchedule(timetable) {
   timetableByTeacher.children().remove();
   const timetableByStudentGroup = $("#timetableByStudentGroup");
   timetableByStudentGroup.children().remove();
-  const unassignedLessons = $("#unassignedLessons");
-  unassignedLessons.children().remove();
+  const unassignedSessions = $("#unassignedSessions");
+  unassignedSessions.children().remove();
 
   const theadByBeamline = $("<thead>").appendTo(timetableByBeamline);
   const headerRowByBeamline = $("<tr>").appendTo(theadByBeamline);
@@ -128,7 +128,7 @@ function renderSchedule(timetable) {
   const theadByTeacher = $("<thead>").appendTo(timetableByTeacher);
   const headerRowByTeacher = $("<tr>").appendTo(theadByTeacher);
   headerRowByTeacher.append($("<th>Shift</th>"));
-  const teachers = [...new Set(timetable.lessons.map(lesson => lesson.teacher))];
+  const teachers = [...new Set(timetable.sessions.map(session => session.teacher))];
   $.each(teachers, (index, teacher) => {
     headerRowByTeacher
       .append($("<th/>")
@@ -137,7 +137,7 @@ function renderSchedule(timetable) {
   const theadByStudentGroup = $("<thead>").appendTo(timetableByStudentGroup);
   const headerRowByStudentGroup = $("<tr>").appendTo(theadByStudentGroup);
   headerRowByStudentGroup.append($("<th>Shift</th>"));
-  const studentGroups = [...new Set(timetable.lessons.map(lesson => lesson.studentGroup))];
+  const studentGroups = [...new Set(timetable.sessions.map(session => session.studentGroup))];
   $.each(studentGroups, (index, studentGroup) => {
     headerRowByStudentGroup
       .append($("<th/>")
@@ -191,22 +191,22 @@ function renderSchedule(timetable) {
     });
   });
 
-  $.each(timetable.lessons, (index, lesson) => {
-    const color = pickColor(lesson.subject);
-    const lessonElement = $(`<div class="card" style="background-color: ${color}"/>`)
+  $.each(timetable.sessions, (index, session) => {
+    const color = pickColor(session.subject);
+    const sessionElement = $(`<div class="card" style="background-color: ${color}"/>`)
       .append($(`<div class="card-body p-2"/>`)
-        .append($(`<h5 class="card-title mb-1"/>`).text(lesson.subject))
+        .append($(`<h5 class="card-title mb-1"/>`).text(session.subject))
         .append($(`<p class="card-text ms-2 mb-1"/>`)
-          .append($(`<em/>`).text(`by ${lesson.teacher}`)))
-        .append($(`<small class="ms-2 mt-1 card-text text-muted align-bottom float-end"/>`).text(lesson.id))
-        .append($(`<p class="card-text ms-2"/>`).text(lesson.studentGroup)));
-    if (lesson.shift == null || lesson.beamline == null) {
-      unassignedLessons.append($(`<div class="col"/>`).append(lessonElement));
+          .append($(`<em/>`).text(`by ${session.teacher}`)))
+        .append($(`<small class="ms-2 mt-1 card-text text-muted align-bottom float-end"/>`).text(session.id))
+        .append($(`<p class="card-text ms-2"/>`).text(session.studentGroup)));
+    if (session.shift == null || session.beamline == null) {
+      unassignedSessions.append($(`<div class="col"/>`).append(sessionElement));
     } else {
-      // In the JSON, the lesson.shift and lesson.beamline are only IDs of these objects.
-      $(`#shift${lesson.shift}beamline${lesson.beamline}`).append(lessonElement.clone());
-      $(`#shift${lesson.shift}teacher${convertToId(lesson.teacher)}`).append(lessonElement.clone());
-      $(`#shift${lesson.shift}studentGroup${convertToId(lesson.studentGroup)}`).append(lessonElement.clone());
+      // In the JSON, the session.shift and session.beamline are only IDs of these objects.
+      $(`#shift${session.shift}beamline${session.beamline}`).append(sessionElement.clone());
+      $(`#shift${session.shift}teacher${convertToId(session.teacher)}`).append(sessionElement.clone());
+      $(`#shift${session.shift}studentGroup${convertToId(session.studentGroup)}`).append(sessionElement.clone());
     }
   });
 }

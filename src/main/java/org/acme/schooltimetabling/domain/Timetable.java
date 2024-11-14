@@ -33,7 +33,7 @@ public class Timetable {
 
     @Getter
     @PlanningEntityCollectionProperty
-    private List<Lesson> lessons;
+    private List<Session> sessions;
 
     @Getter
     @PlanningScore
@@ -51,11 +51,11 @@ public class Timetable {
         this.solverStatus = solverStatus;
     }
 
-    public Timetable(String name, List<Shift> shifts, List<Beamline> beamlines, List<Lesson> lessons) {
+    public Timetable(String name, List<Shift> shifts, List<Beamline> beamlines, List<Session> sessions) {
         this.name = name;
         this.shifts = shifts;
         this.beamlines = beamlines;
-        this.lessons = lessons;
+        this.sessions = sessions;
     }
 
 }

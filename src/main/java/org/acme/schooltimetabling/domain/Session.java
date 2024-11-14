@@ -12,7 +12,7 @@ import lombok.ToString;
 @ToString(of = {"id" })
 @NoArgsConstructor
 @PlanningEntity
-public class Lesson {
+public class Session {
 
     @PlanningId
     private String id;
@@ -29,14 +29,14 @@ public class Lesson {
     @PlanningVariable
     private Beamline beamline;
 
-    public Lesson(String id, String subject, String teacher, String studentGroup) {
+    public Session(String id, String subject, String teacher, String studentGroup) {
         this.id = id;
         this.subject = subject;
         this.teacher = teacher;
         this.studentGroup = studentGroup;
     }
 
-    public Lesson(String id, String subject, String teacher, String studentGroup, Shift shift, Beamline beamline) {
+    public Session(String id, String subject, String teacher, String studentGroup, Shift shift, Beamline beamline) {
         this(id, subject, teacher, studentGroup);
         this.shift = shift;
         this.beamline = beamline;

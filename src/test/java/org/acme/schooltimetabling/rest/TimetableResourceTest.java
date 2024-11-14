@@ -48,11 +48,11 @@ class TimetableResourceTest {
 
         Timetable solution = get("/timetables/" + jobId).then().extract().as(Timetable.class);
         assertEquals(SolverStatus.NOT_SOLVING, solution.getSolverStatus());
-        assertNotNull(solution.getLessons());
+        assertNotNull(solution.getSessions());
         assertNotNull(solution.getShifts());
         assertNotNull(solution.getBeamlines());
-        assertNotNull(solution.getLessons().get(0).getBeamline());
-        assertNotNull(solution.getLessons().get(0).getShift());
+        assertNotNull(solution.getSessions().get(0).getBeamline());
+        assertNotNull(solution.getSessions().get(0).getShift());
         assertTrue(solution.getScore().isFeasible());
     }
 
@@ -67,7 +67,7 @@ class TimetableResourceTest {
         var rooms = testTimetable.getBeamlines();
         var timeslots = testTimetable.getShifts();
         int i = 0;
-        for (var lesson : testTimetable.getLessons()) { // Initialize the solution.
+        for (var lesson : testTimetable.getSessions()) { // Initialize the solution.
             lesson.setBeamline(rooms.get(i % rooms.size()));
             lesson.setShift(timeslots.get(i % timeslots.size()));
             i += 1;
