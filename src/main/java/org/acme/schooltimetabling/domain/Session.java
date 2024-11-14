@@ -36,10 +36,4 @@ public class Session {
         this.studentGroup = studentGroup;
     }
 
-    public Session(String id, String subject, String teacher, String studentGroup, Shift shift, Beamline beamline) {
-        this(id, subject, teacher, studentGroup);
-        this.shift = shift;
-        this.beamline = beamline;
-    }
-
 }

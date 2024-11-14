@@ -30,8 +30,4 @@ public class Shift {
         this.endTime = endTime;
     }
 
-    public Shift(String id, DayOfWeek dayOfWeek, LocalTime startTime) {
-        this(id, dayOfWeek, startTime, startTime.plusMinutes(50));
-    }
-
 }
