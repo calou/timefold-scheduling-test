@@ -147,14 +147,10 @@ console.log("renderSchedule")
   });
 
   $.each(timetable.sessions, (_, session) => {
-    const color = pickColor(session.subject);
+    const color = pickColor(session.proposal.finalNumber);
     const sessionElement = $(`<div class="card" style="background-color: ${color}"/>`)
       .append($(`<div class="card-body p-2"/>`)
-        .append($(`<h5 class="card-title mb-1"/>`).text(session.subject))
-        .append($(`<p class="card-text ms-2 mb-1"/>`)
-          .append($(`<em/>`).text(`by ${session.teacher}`)))
-        .append($(`<small class="ms-2 mt-1 card-text text-muted align-bottom float-end"/>`).text(session.id))
-        .append($(`<p class="card-text ms-2"/>`).text(session.studentGroup)));
+        .append($(`<h5 class="card-title mb-1"/>`).text(session.proposal.finalNumber)));
     if (session.shift_id == null || session.beamline_id == null) {
       unassignedSessions.append($(`<div class="col"/>`).append(sessionElement));
     } else {

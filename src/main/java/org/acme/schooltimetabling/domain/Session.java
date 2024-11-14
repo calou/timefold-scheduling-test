@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.UUID;
+
 @Data
 @ToString(of = {"id" })
 @NoArgsConstructor
@@ -18,9 +20,7 @@ public class Session {
     @PlanningId
     private String id;
 
-    private String subject;
-    private String teacher;
-    private String studentGroup;
+    private Proposal proposal;
 
     @JsonProperty("shift_id")
     @JsonIdentityReference
@@ -29,14 +29,12 @@ public class Session {
 
     @JsonProperty("beamline_id")
     @JsonIdentityReference
-    @PlanningVariable
     private Beamline beamline;
 
-    public Session(String id, String subject, String teacher, String studentGroup) {
-        this.id = id;
-        this.subject = subject;
-        this.teacher = teacher;
-        this.studentGroup = studentGroup;
+    public Session(Proposal proposal, Beamline beamline) {
+        this.id = UUID.randomUUID().toString();
+        this.proposal = proposal;
+        this.beamline = beamline;
     }
 
 }

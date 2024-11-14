@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -12,6 +14,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import org.acme.schooltimetabling.domain.Proposal;
 import org.acme.schooltimetabling.domain.Session;
 import org.acme.schooltimetabling.domain.Beamline;
 import org.acme.schooltimetabling.domain.Shift;
@@ -29,162 +32,86 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Path("demo-data")
 public class TimetableDemoResource {
 
-    public enum DemoData {
-        SMALL,
-        LARGE
+  public enum DemoData {
+    SMALL,
+    LARGE
+  }
+
+  @APIResponses(value = {
+      @APIResponse(responseCode = "200", description = "List of demo data represented as IDs.",
+                   content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                                      schema = @Schema(implementation = DemoData.class, type = SchemaType.ARRAY))) })
+  @Operation(summary = "List demo data.")
+  @GET
+  public DemoData[] list() {
+    return DemoData.values();
+  }
+
+  @APIResponses(value = {
+      @APIResponse(responseCode = "200", description = "Unsolved demo timetable.",
+                   content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                                      schema = @Schema(implementation = Timetable.class))) })
+  @Operation(summary = "Find an unsolved demo timetable by ID.")
+  @GET
+  @Path("/{demoDataId}")
+  public Response generate(@Parameter(description = "Unique identifier of the demo data.",
+                                      required = true) @PathParam("demoDataId") DemoData demoData) {
+    List<Shift> shifts = new ArrayList<>(270);
+
+    for (long i = 0; i < 90L; i++) {
+      var date = LocalDate.now()
+                          .plusDays(i);
+      shifts.addAll(List.of(
+          new Shift(date, 0),
+          new Shift(date, 1),
+          new Shift(date, 2)
+      ));
     }
 
-    @APIResponses(value = {
-            @APIResponse(responseCode = "200", description = "List of demo data represented as IDs.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = DemoData.class, type = SchemaType.ARRAY))) })
-    @Operation(summary = "List demo data.")
-    @GET
-    public DemoData[] list() {
-        return DemoData.values();
-    }
+    List<Beamline> beamlines = new ArrayList<>(3);
+    long nextRoomId = 0L;
+    beamlines.add(new Beamline("ID21"));
+    beamlines.add(new Beamline("ID22"));
+    beamlines.add(new Beamline("CM01"));
 
-    @APIResponses(value = {
-            @APIResponse(responseCode = "200", description = "Unsolved demo timetable.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = Timetable.class)))})
-    @Operation(summary = "Find an unsolved demo timetable by ID.")
-    @GET
-    @Path("/{demoDataId}")
-    public Response generate(@Parameter(description = "Unique identifier of the demo data.",
-            required = true) @PathParam("demoDataId") DemoData demoData) {
-        List<Shift> shifts = new ArrayList<>(270);
+    List<Session> sessions = new ArrayList<>();
 
-        for (long i = 0; i < 90L; i++) {
-            var date = LocalDate.now().plusDays(i);
-            shifts.addAll(List.of(
-               new Shift(date, 0),
-               new Shift(date, 1),
-               new Shift(date, 2)
-            ));
-        }
+    final BiConsumer<String, RequestedBeamline> sessionCreate = (finalNumber, requestedBeamline) -> {
+      var proposal = new Proposal(finalNumber);
+      for (int i = 0; i < requestedBeamline.shift; i++) {
+        sessions.add(new Session(proposal, requestedBeamline.beamline));
+      }
+    };
 
-        List<Beamline> beamlines = new ArrayList<>(3);
-        long nextRoomId = 0L;
-        beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room A"));
-        beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room B"));
-        beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room C"));
-        if (demoData == DemoData.LARGE) {
-            beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room D"));
-            beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room E"));
-            beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room F"));
-        }
+    var beamline1 = beamlines.get(0);
+    Map.of("MX-1234", new RequestedBeamline(beamline1, 25),
+           "STD-0001", new RequestedBeamline(beamline1, 12),
+           "LT-0101", new RequestedBeamline(beamline1, 16),
+           "IN-666", new RequestedBeamline(beamline1, 3)
+       )
+       .forEach(sessionCreate);
 
-        List<Session> sessions = new ArrayList<>();
-        long nextLessonId = 0L;
-        sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "9th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "9th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Physics", "M. Curie", "9th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Chemistry", "M. Curie", "9th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Biology", "C. Darwin", "9th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "History", "I. Jones", "9th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "English", "I. Jones", "9th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "English", "I. Jones", "9th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Spanish", "P. Cruz", "9th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Spanish", "P. Cruz", "9th grade"));
-        if (demoData == DemoData.LARGE) {
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "ICT", "A. Turing", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physics", "M. Curie", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Geography", "C. Darwin", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Geology", "C. Darwin", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "History", "I. Jones", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "English", "I. Jones", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Drama", "I. Jones", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Art", "S. Dali", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Art", "S. Dali", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "9th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "9th grade"));
-        }
+    var beamline2 = beamlines.get(1);
+    Map.of("MX-1234", new RequestedBeamline(beamline2, 30),
+           "LT-0101", new RequestedBeamline(beamline2, 30),
+           "IN-666", new RequestedBeamline( beamline2, 40)
+       )
+       .forEach(sessionCreate);
 
-        sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "10th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "10th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "10th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Physics", "M. Curie", "10th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Chemistry", "M. Curie", "10th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "French", "M. Curie", "10th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Geography", "C. Darwin", "10th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "History", "I. Jones", "10th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "English", "P. Cruz", "10th grade"));
-        sessions.add(new Session(Long.toString(nextLessonId++), "Spanish", "P. Cruz", "10th grade"));
-        if (demoData == DemoData.LARGE) {
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "ICT", "A. Turing", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physics", "M. Curie", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Biology", "C. Darwin", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Geology", "C. Darwin", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "History", "I. Jones", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "English", "P. Cruz", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "English", "P. Cruz", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Drama", "I. Jones", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Art", "S. Dali", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Art", "S. Dali", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "10th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "10th grade"));
 
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "ICT", "A. Turing", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physics", "M. Curie", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Chemistry", "M. Curie", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "French", "M. Curie", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physics", "M. Curie", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Geography", "C. Darwin", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Biology", "C. Darwin", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Geology", "C. Darwin", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "History", "I. Jones", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "History", "I. Jones", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "English", "P. Cruz", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "English", "P. Cruz", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "English", "P. Cruz", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Spanish", "P. Cruz", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Drama", "P. Cruz", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Art", "S. Dali", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Art", "S. Dali", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "11th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "11th grade"));
+    var beamline3 = beamlines.get(2);
+    Map.of("MX-1234", new RequestedBeamline(beamline3, 10),
+           "STD-0001", new RequestedBeamline(beamline3, 5),
+           "LT-0101", new RequestedBeamline(beamline3, 2),
+           "IN-666", new RequestedBeamline(beamline3, 40)
+       )
+       .forEach(sessionCreate);
 
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Math", "A. Turing", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "ICT", "A. Turing", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physics", "M. Curie", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Chemistry", "M. Curie", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "French", "M. Curie", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physics", "M. Curie", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Geography", "C. Darwin", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Biology", "C. Darwin", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Geology", "C. Darwin", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "History", "I. Jones", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "History", "I. Jones", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "English", "P. Cruz", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "English", "P. Cruz", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "English", "P. Cruz", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Spanish", "P. Cruz", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Drama", "P. Cruz", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Art", "S. Dali", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Art", "S. Dali", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "12th grade"));
-            sessions.add(new Session(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "12th grade"));
-        }
-        return Response.ok(new Timetable(demoData.name(), shifts, beamlines, sessions)).build();
-    }
 
+    return Response.ok(new Timetable(demoData.name(), shifts, beamlines, sessions))
+                   .build();
+  }
+
+
+  private record RequestedBeamline(Beamline beamline, int shift){}
 }
