@@ -34,7 +34,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                         // ... in the same timeslot ...
                         Joiners.equal(Lesson::getShift),
                         // ... in the same room ...
-                        Joiners.equal(Lesson::getRoom))
+                        Joiners.equal(Lesson::getBeamline))
                 // ... and penalize each pair with a hard weight.
                 .penalize(HardSoftScore.ONE_HARD)
                 .asConstraint("Room conflict");
@@ -65,7 +65,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         return constraintFactory
                 .forEachUniquePair(Lesson.class,
                         Joiners.equal(Lesson::getTeacher))
-                .filter((lesson1, lesson2) -> lesson1.getRoom() != lesson2.getRoom())
+                .filter((lesson1, lesson2) -> lesson1.getBeamline() != lesson2.getBeamline())
                 .penalize(HardSoftScore.ONE_SOFT)
                 .asConstraint("Teacher room stability");
     }

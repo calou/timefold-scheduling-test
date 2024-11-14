@@ -12,7 +12,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import org.acme.schooltimetabling.domain.Lesson;
-import org.acme.schooltimetabling.domain.Room;
+import org.acme.schooltimetabling.domain.Beamline;
 import org.acme.schooltimetabling.domain.Shift;
 import org.acme.schooltimetabling.domain.Timetable;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -83,15 +83,15 @@ public class TimetableDemoResource {
             shifts.add(new Shift(Long.toString(nextTimeslotId++), DayOfWeek.FRIDAY, LocalTime.of(14, 30), LocalTime.of(15, 30)));
         }
 
-        List<Room> rooms = new ArrayList<>(3);
+        List<Beamline> beamlines = new ArrayList<>(3);
         long nextRoomId = 0L;
-        rooms.add(new Room(Long.toString(nextRoomId++), "Room A"));
-        rooms.add(new Room(Long.toString(nextRoomId++), "Room B"));
-        rooms.add(new Room(Long.toString(nextRoomId++), "Room C"));
+        beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room A"));
+        beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room B"));
+        beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room C"));
         if (demoData == DemoData.LARGE) {
-            rooms.add(new Room(Long.toString(nextRoomId++), "Room D"));
-            rooms.add(new Room(Long.toString(nextRoomId++), "Room E"));
-            rooms.add(new Room(Long.toString(nextRoomId++), "Room F"));
+            beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room D"));
+            beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room E"));
+            beamlines.add(new Beamline(Long.toString(nextRoomId++), "Room F"));
         }
 
         List<Lesson> lessons = new ArrayList<>();
@@ -203,7 +203,7 @@ public class TimetableDemoResource {
             lessons.add(new Lesson(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "12th grade"));
             lessons.add(new Lesson(Long.toString(nextLessonId++), "Physical education", "C. Lewis", "12th grade"));
         }
-        return Response.ok(new Timetable(demoData.name(), shifts, rooms, lessons)).build();
+        return Response.ok(new Timetable(demoData.name(), shifts, beamlines, lessons)).build();
     }
 
 }

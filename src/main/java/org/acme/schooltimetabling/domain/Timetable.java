@@ -29,7 +29,7 @@ public class Timetable {
     @Getter
     @ProblemFactCollectionProperty
     @ValueRangeProvider
-    private List<Room> rooms;
+    private List<Beamline> beamlines;
 
     @Getter
     @PlanningEntityCollectionProperty
@@ -51,10 +51,10 @@ public class Timetable {
         this.solverStatus = solverStatus;
     }
 
-    public Timetable(String name, List<Shift> shifts, List<Room> rooms, List<Lesson> lessons) {
+    public Timetable(String name, List<Shift> shifts, List<Beamline> beamlines, List<Lesson> lessons) {
         this.name = name;
         this.shifts = shifts;
-        this.rooms = rooms;
+        this.beamlines = beamlines;
         this.lessons = lessons;
     }
 

@@ -106,8 +106,8 @@ function renderSchedule(timetable) {
   refreshSolvingButtons(timetable.solverStatus != null && timetable.solverStatus !== "NOT_SOLVING");
   $("#score").text("Score: " + (timetable.score == null ? "?" : timetable.score));
 
-  const timetableByRoom = $("#timetableByRoom");
-  timetableByRoom.children().remove();
+  const timetableByBeamline = $("#timetableByBeamline");
+  timetableByBeamline.children().remove();
   const timetableByTeacher = $("#timetableByTeacher");
   timetableByTeacher.children().remove();
   const timetableByStudentGroup = $("#timetableByStudentGroup");
@@ -115,14 +115,14 @@ function renderSchedule(timetable) {
   const unassignedLessons = $("#unassignedLessons");
   unassignedLessons.children().remove();
 
-  const theadByRoom = $("<thead>").appendTo(timetableByRoom);
-  const headerRowByRoom = $("<tr>").appendTo(theadByRoom);
-  headerRowByRoom.append($("<th>Shift</th>"));
+  const theadByBeamline = $("<thead>").appendTo(timetableByBeamline);
+  const headerRowByBeamline = $("<tr>").appendTo(theadByBeamline);
+  headerRowByBeamline.append($("<th>Shift</th>"));
 
-  $.each(timetable.rooms, (index, room) => {
-    headerRowByRoom
+  $.each(timetable.beamlines, (index, beamline) => {
+    headerRowByBeamline
       .append($("<th/>")
-        .append($("<span/>").text(room.name))
+        .append($("<span/>").text(beamline.name))
         .append($(`<button type="button" class="ms-2 mb-1 btn btn-light btn-sm p-1"/>`)));
   });
   const theadByTeacher = $("<thead>").appendTo(timetableByTeacher);
@@ -144,15 +144,15 @@ function renderSchedule(timetable) {
         .append($("<span/>").text(studentGroup)));
   });
 
-  const tbodyByRoom = $("<tbody>").appendTo(timetableByRoom);
+  const tbodyByBeamline = $("<tbody>").appendTo(timetableByBeamline);
   const tbodyByTeacher = $("<tbody>").appendTo(timetableByTeacher);
   const tbodyByStudentGroup = $("<tbody>").appendTo(timetableByStudentGroup);
 
   const LocalTime = JSJoda.LocalTime;
 
   $.each(timetable.shifts, (index, shift) => {
-    const rowByRoom = $("<tr>").appendTo(tbodyByRoom);
-    rowByRoom
+    const rowByBeamline = $("<tr>").appendTo(tbodyByBeamline);
+    rowByBeamline
       .append($(`<th class="align-middle"/>`)
         .append($("<span/>").text(`
                     ${shift.dayOfWeek.charAt(0) + shift.dayOfWeek.slice(1).toLowerCase()}
@@ -160,8 +160,8 @@ function renderSchedule(timetable) {
                     -
                     ${LocalTime.parse(shift.endTime).format(dateTimeFormatter)}
                 `)));
-    $.each(timetable.rooms, (index, room) => {
-      rowByRoom.append($("<td/>").prop("id", `shift${shift.id}room${room.id}`));
+    $.each(timetable.beamlines, (index, beamline) => {
+      rowByBeamline.append($("<td/>").prop("id", `shift${shift.id}beamline${beamline.id}`));
     });
 
     const rowByTeacher = $("<tr>").appendTo(tbodyByTeacher);
@@ -200,11 +200,11 @@ function renderSchedule(timetable) {
           .append($(`<em/>`).text(`by ${lesson.teacher}`)))
         .append($(`<small class="ms-2 mt-1 card-text text-muted align-bottom float-end"/>`).text(lesson.id))
         .append($(`<p class="card-text ms-2"/>`).text(lesson.studentGroup)));
-    if (lesson.shift == null || lesson.room == null) {
+    if (lesson.shift == null || lesson.beamline == null) {
       unassignedLessons.append($(`<div class="col"/>`).append(lessonElement));
     } else {
-      // In the JSON, the lesson.shift and lesson.room are only IDs of these objects.
-      $(`#shift${lesson.shift}room${lesson.room}`).append(lessonElement.clone());
+      // In the JSON, the lesson.shift and lesson.beamline are only IDs of these objects.
+      $(`#shift${lesson.shift}beamline${lesson.beamline}`).append(lessonElement.clone());
       $(`#shift${lesson.shift}teacher${convertToId(lesson.teacher)}`).append(lessonElement.clone());
       $(`#shift${lesson.shift}studentGroup${convertToId(lesson.studentGroup)}`).append(lessonElement.clone());
     }

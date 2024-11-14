@@ -12,8 +12,8 @@ import lombok.ToString;
 @ToString(of = { "id" })
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIdentityInfo(scope = Room.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Room {
+@JsonIdentityInfo(scope = Beamline.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class Beamline {
 
     @PlanningId
     private String id;

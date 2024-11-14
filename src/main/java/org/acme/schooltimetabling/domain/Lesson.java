@@ -27,7 +27,7 @@ public class Lesson {
 
     @JsonIdentityReference
     @PlanningVariable
-    private Room room;
+    private Beamline beamline;
 
     public Lesson(String id, String subject, String teacher, String studentGroup) {
         this.id = id;
@@ -36,10 +36,10 @@ public class Lesson {
         this.studentGroup = studentGroup;
     }
 
-    public Lesson(String id, String subject, String teacher, String studentGroup, Shift shift, Room room) {
+    public Lesson(String id, String subject, String teacher, String studentGroup, Shift shift, Beamline beamline) {
         this(id, subject, teacher, studentGroup);
         this.shift = shift;
-        this.room = room;
+        this.beamline = beamline;
     }
 
 }
