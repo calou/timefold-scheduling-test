@@ -16,11 +16,13 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         beamlineConflict(constraintFactory),
         proposalConflict(constraintFactory),
         beamModeConflict(constraintFactory),
+        proposalUnacceptableDates(constraintFactory),
         //studentGroupConflict(constraintFactory),
         // Soft constraints
         //teacherBeamlineStability(constraintFactory),
         consecutiveProposalSession(constraintFactory),
-        proposalSessionProximity(constraintFactory)
+        proposalSessionProximity(constraintFactory),
+        proposalPreferredDatesConstraint(constraintFactory)
         //studentGroupSubjectVariety(constraintFactory)
     };
   }
@@ -42,9 +44,30 @@ public class TimetableConstraintProvider implements ConstraintProvider {
   Constraint beamModeConflict(ConstraintFactory constraintFactory) {
     return constraintFactory
         .forEach(Session.class)
-        .filter( session -> !session.getBeamtimeSlot().getBeamMode().equals(session.getProposal().getBeamMode()) )
+        .filter(session -> !session.getBeamtimeSlot()
+                                   .getBeamMode()
+                                   .equals(session.getProposal()
+                                                  .getBeamMode()))
         .penalize(HardSoftScore.ONE_HARD)
         .asConstraint("Session mode");
+  }
+
+  Constraint proposalUnacceptableDates(ConstraintFactory constraintFactory) {
+    return constraintFactory
+        .forEach(Session.class)
+        .filter(this::isSessionWithDatePrefs)
+        .filter(this::isSessionDateUnacceptable)
+        .penalize(HardSoftScore.ONE_HARD)
+        .asConstraint("Proposal unacceptable dates");
+  }
+
+  Constraint proposalPreferredDatesConstraint(ConstraintFactory constraintFactory){
+    return constraintFactory
+        .forEach(Session.class)
+        .filter(this::isSessionWithDatePrefs)
+        .filter(this::isSessionDatePreferred)
+        .reward(HardSoftScore.ofSoft(3))
+        .asConstraint("Proposal preferred dates");
   }
 
   // only one session per proposal is allowed at a given time
@@ -55,21 +78,10 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                            Joiners.equal(Session::getBeamtimeSlot),
                            Joiners.equal(Session::getProposal))
         .penalize(HardSoftScore.ONE_HARD)
-        .asConstraint("Teacher conflict");
+        .asConstraint("proposal single session conflict");
   }
 
-    /*
-    Constraint teacherBeamlineStability(ConstraintFactory constraintFactory) {
-        // A proposal prefers to teach in a single room.
-        return constraintFactory
-                .forEachUniquePair(Session.class,
-                                   Joiners.equal(Session::getProposal))
-                .filter((session1, session2) -> session1.getBeamline() != session2.getBeamline())
-                .penalize(HardSoftScore.ONE_SOFT)
-                .asConstraint("Teacher Beamline stability");
-    }*/
-
-  // Consecutive sessions are prefered for a given proposal
+  // Consecutive sessions are preferred for a given proposal
   Constraint consecutiveProposalSession(ConstraintFactory constraintFactory) {
     return constraintFactory
         .forEach(Session.class)
@@ -94,7 +106,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
           var indexDiff = session2.getBeamtimeSlot()
                                   .getIndex() - session1.getBeamtimeSlot()
                                                         .getIndex();
-          return  (int)(-1 * Math.abs(indexDiff/3)) ;
+          return (int) (-1 * Math.abs(indexDiff / 3));
         })
         .asConstraint("Proposal session proximity");
   }
@@ -118,5 +130,29 @@ public class TimetableConstraintProvider implements ConstraintProvider {
     }
 
      */
+
+
+  private boolean isSessionWithDatePrefs(Session session) {
+    return session.getProposal()
+                  .getDatePreferences() != null && !session.getProposal()
+                                                           .getDatePreferences()
+                                                           .isEmpty();
+  }
+
+  private boolean isSessionDateUnacceptable(Session session) {
+    return session.getProposal()
+                  .getDatePreferences()
+                  .stream()
+                  .anyMatch(datePrefs -> !datePrefs.isAcceptable() && datePrefs.contains(session.getBeamtimeSlot()
+                                                                                                .getDate()));
+  }
+
+  private boolean isSessionDatePreferred(Session session) {
+    return session.getProposal()
+                  .getDatePreferences()
+                  .stream()
+                  .anyMatch(datePrefs -> datePrefs.isAcceptable() && datePrefs.contains(session.getBeamtimeSlot()
+                                                                                               .getDate()));
+  }
 
 }
