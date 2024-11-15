@@ -139,7 +139,8 @@ console.log("renderSchedule")
     const rowByBeamline = $("<tr>").appendTo(tbodyByBeamline);
     rowByBeamline
       .append($(`<th class="align-middle"/>`)
-        .append($("<span/>").text(shift.id)));
+        .append($("<span/>").text(shift.id + " - " + shift.beamMode.name))
+        );
     $.each(timetable.beamlines, (_, beamline) => {
       rowByBeamline.append($("<td/>").prop("id", toHtmlId(shift.id, beamline.id)));
     });

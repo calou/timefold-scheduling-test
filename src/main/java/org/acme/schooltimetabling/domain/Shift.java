@@ -26,30 +26,18 @@ public class Shift {
 
   private int shiftNum;
 
-  private LocalTime startTime;
-
-  private LocalTime endTime;
+  private BeamMode beamMode;
 
   @JsonIgnore
   private long shiftIndex;
 
-  public Shift(LocalDate date, int shiftNum) {
+  public Shift(LocalDate date, int shiftNum, BeamMode beamMode) {
     this.id = "%1$s/%2$s".formatted(date.format(DateTimeFormatter.ISO_DATE), shiftNum);
     this.date = date;
     this.shiftNum = shiftNum;
+    this.beamMode = beamMode;
 
-    shiftIndex = this.date.getLong(ChronoField.EPOCH_DAY) * 3 + shiftNum;
-
-    this.startTime = switch (shiftNum) {
-      case 0 -> LocalTime.MIDNIGHT;
-      case 1 -> LocalTime.of(8, 0);
-      default -> LocalTime.of(16, 0);
-    };
-    this.endTime = switch (shiftNum) {
-      case 0 -> LocalTime.of(7, 59, 59);
-      case 1 -> LocalTime.of(15, 59, 59);
-      default -> LocalTime.of(23, 59, 59);
-    };
+    shiftIndex = this.date.getLong(ChronoField.EPOCH_DAY) * 24 + shiftNum;
   }
 
 }

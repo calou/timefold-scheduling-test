@@ -13,6 +13,7 @@ import java.util.Locale;
 
 @Data
 @ToString(of = { "id" })
+@NoArgsConstructor
 @JsonIdentityInfo(scope = Beamline.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Beamline {
 

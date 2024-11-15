@@ -14,6 +14,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import org.acme.schooltimetabling.domain.BeamMode;
 import org.acme.schooltimetabling.domain.Proposal;
 import org.acme.schooltimetabling.domain.Session;
 import org.acme.schooltimetabling.domain.Beamline;
@@ -57,27 +58,33 @@ public class TimetableDemoResource {
   public Response generate(@Parameter(description = "Unique identifier of the demo data.",
                                       required = true) @PathParam("demoDataId") DemoData demoData) {
     List<Shift> shifts = new ArrayList<>(270);
+    var singleBunchBeamMode = new BeamMode("Single Bunch");
+    var sevenEighthsBeamMode = new BeamMode("7/8 + 1 Filling 200mA");
 
-    for (long i = 0; i < 90L; i++) {
+    for (long day = 0; day < 7L; day++) {
       var date = LocalDate.now()
-                          .plusDays(i);
-      shifts.addAll(List.of(
-          new Shift(date, 0),
-          new Shift(date, 1),
-          new Shift(date, 2)
-      ));
+                          .plusDays(day);
+
+      var beamMode = switch ((int)day){
+        case 0,1,3,5 -> singleBunchBeamMode;
+        default -> sevenEighthsBeamMode;
+      };
+      for (int hour = 0; hour < 24; hour++) {
+        shifts.add(new Shift(date, hour, beamMode));
+      }
     }
 
     List<Beamline> beamlines = new ArrayList<>(3);
-    long nextRoomId = 0L;
+
     beamlines.add(new Beamline("ID21"));
     beamlines.add(new Beamline("ID22"));
     beamlines.add(new Beamline("CM01"));
 
     List<Session> sessions = new ArrayList<>();
 
-    final BiConsumer<String, RequestedBeamline> sessionCreate = (finalNumber, requestedBeamline) -> {
-      var proposal = new Proposal(finalNumber);
+
+    final BiConsumer<String, RequestedBeamline> singleBunchSessionCreate = (finalNumber, requestedBeamline) -> {
+      var proposal = new Proposal(finalNumber, singleBunchBeamMode);
       for (int i = 0; i < requestedBeamline.shift; i++) {
         sessions.add(new Session(proposal, requestedBeamline.beamline));
       }
@@ -89,14 +96,14 @@ public class TimetableDemoResource {
            "LT-0101", new RequestedBeamline(beamline1, 16),
            "IN-666", new RequestedBeamline(beamline1, 3)
        )
-       .forEach(sessionCreate);
+       .forEach(singleBunchSessionCreate);
 
     var beamline2 = beamlines.get(1);
     Map.of("MX-1234", new RequestedBeamline(beamline2, 30),
            "LT-0101", new RequestedBeamline(beamline2, 30),
            "IN-666", new RequestedBeamline( beamline2, 40)
        )
-       .forEach(sessionCreate);
+       .forEach(singleBunchSessionCreate);
 
 
     var beamline3 = beamlines.get(2);
@@ -105,7 +112,7 @@ public class TimetableDemoResource {
            "LT-0101", new RequestedBeamline(beamline3, 2),
            "IN-666", new RequestedBeamline(beamline3, 40)
        )
-       .forEach(sessionCreate);
+       .forEach(singleBunchSessionCreate);
 
 
     return Response.ok(new Timetable(demoData.name(), shifts, beamlines, sessions))

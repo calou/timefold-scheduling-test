@@ -11,4 +11,6 @@ public class Proposal {
 
   private String finalNumber;
 
+  // Must match shifts beamMode
+  private BeamMode beamMode;
 }
