@@ -88,6 +88,13 @@ public class TimetableDemoResource {
       }
     };
 
+    final BiConsumer<String, RequestedBeamline> sevenEighthsSessionCreate = (finalNumber, requestedBeamline) -> {
+      var proposal = new Proposal(finalNumber, sevenEighthsBeamMode);
+      for (int i = 0; i < requestedBeamline.shift; i++) {
+        sessions.add(new Session(proposal, requestedBeamline.beamline));
+      }
+    };
+
     var beamline1 = beamlines.get(0);
     Map.of("MX-1234", new RequestedBeamline(beamline1, 25),
            "STD-0001", new RequestedBeamline(beamline1, 12),
@@ -95,6 +102,11 @@ public class TimetableDemoResource {
            "IN-666", new RequestedBeamline(beamline1, 3)
        )
        .forEach(singleBunchSessionCreate);
+
+    Map.of("MX-7/8", new RequestedBeamline(beamline1, 14),
+           "STD-7/8", new RequestedBeamline(beamline1, 5)
+       )
+       .forEach(sevenEighthsSessionCreate);
 
     var beamline2 = beamlines.get(1);
     Map.of("MX-1234", new RequestedBeamline(beamline2, 30),
@@ -112,6 +124,10 @@ public class TimetableDemoResource {
        )
        .forEach(singleBunchSessionCreate);
 
+    Map.of("MX-7/8", new RequestedBeamline(beamline3, 14),
+           "STD-7/8", new RequestedBeamline(beamline3, 5)
+       )
+       .forEach(sevenEighthsSessionCreate);
 
     return Response.ok(new Timetable(demoData.name(), beamtimeSlots, beamlines, sessions))
                    .build();
