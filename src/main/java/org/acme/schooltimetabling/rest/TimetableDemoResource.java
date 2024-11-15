@@ -14,10 +14,13 @@ import jakarta.ws.rs.core.Response;
 
 import org.acme.schooltimetabling.domain.BeamMode;
 import org.acme.schooltimetabling.domain.DatePreference;
+import org.acme.schooltimetabling.domain.LocalContactAssignment;
+import org.acme.schooltimetabling.domain.LocalContactCandidate;
 import org.acme.schooltimetabling.domain.Proposal;
 import org.acme.schooltimetabling.domain.Session;
 import org.acme.schooltimetabling.domain.Beamline;
 import org.acme.schooltimetabling.domain.BeamtimeSlot;
+import org.acme.schooltimetabling.domain.StaffMember;
 import org.acme.schooltimetabling.domain.Timetable;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -56,7 +59,16 @@ public class TimetableDemoResource {
   @Path("/{demoDataId}")
   public Response generate(@Parameter(description = "Unique identifier of the demo data.",
                                       required = true) @PathParam("demoDataId") DemoData demoData) {
-    List<BeamtimeSlot> beamtimeSlots = new ArrayList<>(270);
+    var localContactAssignments = new ArrayList<LocalContactAssignment>(300);
+    var localContactCandidates = new ArrayList<LocalContactCandidate>();
+
+    var paul = new StaffMember("Paul");
+    var georges = new StaffMember("Georges");
+
+
+
+
+    var beamtimeSlots = new ArrayList<BeamtimeSlot>(300);
     var singleBunchBeamMode = new BeamMode("Single Bunch");
     var sevenEighthsBeamMode = new BeamMode("7/8 + 1 Filling 200mA");
 
@@ -79,6 +91,17 @@ public class TimetableDemoResource {
     beamlines.add(new Beamline("ID21"));
     beamlines.add(new Beamline("ID22"));
     beamlines.add(new Beamline("CM01"));
+
+    localContactCandidates.add(new LocalContactCandidate(beamlines.get(0), paul));
+    localContactCandidates.add(new LocalContactCandidate(beamlines.get(1), paul));
+    localContactCandidates.add(new LocalContactCandidate(beamlines.get(1), georges));
+    localContactCandidates.add(new LocalContactCandidate(beamlines.get(2), georges));
+
+    for (BeamtimeSlot beamtimeSlot : beamtimeSlots) {
+      for (Beamline beamline : beamlines) {
+        localContactAssignments.add(new LocalContactAssignment(beamtimeSlot, beamline));
+      }
+    }
 
     List<Session> sessions = new ArrayList<>();
 
@@ -140,7 +163,14 @@ public class TimetableDemoResource {
        )
        .forEach(sevenEighthsSessionCreate);
 
-    return Response.ok(new Timetable(demoData.name(), beamtimeSlots, beamlines, sessions))
+    return Response.ok(new Timetable(
+                       demoData.name(),
+                       beamtimeSlots,
+                       beamlines,
+                       sessions,
+                       localContactCandidates,
+                       localContactAssignments)
+                   )
                    .build();
   }
 

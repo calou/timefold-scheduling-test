@@ -18,44 +18,60 @@ import lombok.Setter;
 @PlanningSolution
 public class Timetable {
 
-    @Getter
-    private String name;
+  @Getter
+  private String name;
 
-    @Getter
-    @ProblemFactCollectionProperty
-    @ValueRangeProvider
-    private List<BeamtimeSlot> beamtimeSlots;
+  @Getter
+  @ProblemFactCollectionProperty
+  @ValueRangeProvider
+  private List<BeamtimeSlot> beamtimeSlots;
 
-    @Getter
-    @ProblemFactCollectionProperty
-    @ValueRangeProvider
-    private List<Beamline> beamlines;
+  @Getter
+  @ProblemFactCollectionProperty
+  @ValueRangeProvider
+  private List<Beamline> beamlines;
 
-    @Getter
-    @PlanningEntityCollectionProperty
-    private List<Session> sessions;
+  @Getter
+  @ProblemFactCollectionProperty
+  @ValueRangeProvider
+  private List<LocalContactCandidate> localContactCandidates;
 
-    @Getter
-    @PlanningScore
-    private HardSoftScore score;
+  @Getter
+  @PlanningEntityCollectionProperty
+  private List<Session> sessions;
+
+  @Getter
+  @PlanningEntityCollectionProperty
+  private List<LocalContactAssignment> localContactAssignments;
+
+  @Getter
+  @PlanningScore
+  private HardSoftScore score;
 
 
-    @Getter
-    @Setter
-    // Ignored by Timefold, used by the UI to display solve or stop solving button
-    private SolverStatus solverStatus;
+  @Getter
+  @Setter
+  // Ignored by Timefold, used by the UI to display solve or stop solving button
+  private SolverStatus solverStatus;
 
-    public Timetable(String name, HardSoftScore score, SolverStatus solverStatus) {
-        this.name = name;
-        this.score = score;
-        this.solverStatus = solverStatus;
-    }
+  public Timetable(String name, HardSoftScore score, SolverStatus solverStatus) {
+    this.name = name;
+    this.score = score;
+    this.solverStatus = solverStatus;
+  }
 
-    public Timetable(String name, List<BeamtimeSlot> beamtimeSlots, List<Beamline> beamlines, List<Session> sessions) {
-        this.name = name;
-        this.beamtimeSlots = beamtimeSlots;
-        this.beamlines = beamlines;
-        this.sessions = sessions;
-    }
+  public Timetable(String name,
+                   List<BeamtimeSlot> beamtimeSlots,
+                   List<Beamline> beamlines,
+                   List<Session> sessions,
+                   List<LocalContactCandidate> localContactCandidates,
+                   List<LocalContactAssignment> localContactAssignments) {
+    this.name = name;
+    this.beamtimeSlots = beamtimeSlots;
+    this.beamlines = beamlines;
+    this.sessions = sessions;
+    this.localContactCandidates = localContactCandidates;
+    this.localContactAssignments = localContactAssignments;
+  }
 
 }
