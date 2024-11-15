@@ -22,10 +22,10 @@ public class Session {
 
     private Proposal proposal;
 
-    @JsonProperty("shift_id")
+    @JsonProperty("beamtimeSlot_id")
     @JsonIdentityReference
     @PlanningVariable
-    private Shift shift;
+    private BeamtimeSlot beamtimeSlot;
 
     @JsonProperty("beamline_id")
     @JsonIdentityReference

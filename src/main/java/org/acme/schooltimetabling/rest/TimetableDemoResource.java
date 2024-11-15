@@ -1,8 +1,6 @@
 package org.acme.schooltimetabling.rest;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +16,7 @@ import org.acme.schooltimetabling.domain.BeamMode;
 import org.acme.schooltimetabling.domain.Proposal;
 import org.acme.schooltimetabling.domain.Session;
 import org.acme.schooltimetabling.domain.Beamline;
-import org.acme.schooltimetabling.domain.Shift;
+import org.acme.schooltimetabling.domain.BeamtimeSlot;
 import org.acme.schooltimetabling.domain.Timetable;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -57,7 +55,7 @@ public class TimetableDemoResource {
   @Path("/{demoDataId}")
   public Response generate(@Parameter(description = "Unique identifier of the demo data.",
                                       required = true) @PathParam("demoDataId") DemoData demoData) {
-    List<Shift> shifts = new ArrayList<>(270);
+    List<BeamtimeSlot> beamtimeSlots = new ArrayList<>(270);
     var singleBunchBeamMode = new BeamMode("Single Bunch");
     var sevenEighthsBeamMode = new BeamMode("7/8 + 1 Filling 200mA");
 
@@ -70,7 +68,7 @@ public class TimetableDemoResource {
         default -> sevenEighthsBeamMode;
       };
       for (int hour = 0; hour < 24; hour++) {
-        shifts.add(new Shift(date, hour, beamMode));
+        beamtimeSlots.add(new BeamtimeSlot(date, hour, beamMode));
       }
     }
 
@@ -115,7 +113,7 @@ public class TimetableDemoResource {
        .forEach(singleBunchSessionCreate);
 
 
-    return Response.ok(new Timetable(demoData.name(), shifts, beamlines, sessions))
+    return Response.ok(new Timetable(demoData.name(), beamtimeSlots, beamlines, sessions))
                    .build();
   }
 

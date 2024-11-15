@@ -31,7 +31,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         // Select each pair of 2 different sessions ...
         .forEachUniquePair(Session.class,
                            // ... in the same shifts ...
-                           Joiners.equal(Session::getShift),
+                           Joiners.equal(Session::getBeamtimeSlot),
                            // ... on the same beamline ...
                            Joiners.equal(Session::getBeamline))
         // ... and penalize each pair with a hard weight.
@@ -42,7 +42,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
   Constraint beamModeConflict(ConstraintFactory constraintFactory) {
     return constraintFactory
         .forEach(Session.class)
-        .filter( session -> !session.getShift().getBeamMode().equals(session.getProposal().getBeamMode()) )
+        .filter( session -> !session.getBeamtimeSlot().getBeamMode().equals(session.getProposal().getBeamMode()) )
         .penalize(HardSoftScore.ONE_HARD)
         .asConstraint("Session mode");
   }
@@ -52,7 +52,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
 
     return constraintFactory
         .forEachUniquePair(Session.class,
-                           Joiners.equal(Session::getShift),
+                           Joiners.equal(Session::getBeamtimeSlot),
                            Joiners.equal(Session::getProposal))
         .penalize(HardSoftScore.ONE_HARD)
         .asConstraint("Teacher conflict");
@@ -76,9 +76,9 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         .join(Session.class, Joiners.equal(Session::getProposal)
         )
         .filter((session1, session2) -> {
-          var indexDiff = session2.getShift()
-                                  .getShiftIndex() - session1.getShift()
-                                                             .getShiftIndex();
+          var indexDiff = session2.getBeamtimeSlot()
+                                  .getIndex() - session1.getBeamtimeSlot()
+                                                        .getIndex();
           return Math.abs(indexDiff) == 1l;
         })
         .reward(HardSoftScore.ONE_SOFT)
@@ -91,9 +91,9 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         .forEach(Session.class)
         .join(Session.class, Joiners.equal(Session::getProposal))
         .impact(HardSoftScore.ONE_SOFT, (session1, session2) -> {
-          var indexDiff = session2.getShift()
-                                  .getShiftIndex() - session1.getShift()
-                                                             .getShiftIndex();
+          var indexDiff = session2.getBeamtimeSlot()
+                                  .getIndex() - session1.getBeamtimeSlot()
+                                                        .getIndex();
           return  (int)(-1 * Math.abs(indexDiff/3)) ;
         })
         .asConstraint("Proposal session proximity");

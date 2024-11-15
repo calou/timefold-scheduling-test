@@ -1,7 +1,6 @@
 package org.acme.schooltimetabling.domain;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 
@@ -16,28 +15,28 @@ import lombok.ToString;
 @Data
 @ToString(of = { "date", "startTime" })
 @NoArgsConstructor
-@JsonIdentityInfo(scope = Shift.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Shift {
+@JsonIdentityInfo(scope = BeamtimeSlot.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class BeamtimeSlot {
 
   @PlanningId
   private String id;
 
   private LocalDate date;
 
-  private int shiftNum;
+  private int dailyIndex;
 
   private BeamMode beamMode;
 
   @JsonIgnore
-  private long shiftIndex;
+  private long index;
 
-  public Shift(LocalDate date, int shiftNum, BeamMode beamMode) {
-    this.id = "%1$s/%2$s".formatted(date.format(DateTimeFormatter.ISO_DATE), shiftNum);
+  public BeamtimeSlot(LocalDate date, int dailyIndex, BeamMode beamMode) {
+    this.id = "%1$s/%2$s".formatted(date.format(DateTimeFormatter.ISO_DATE), dailyIndex);
     this.date = date;
-    this.shiftNum = shiftNum;
+    this.dailyIndex = dailyIndex;
     this.beamMode = beamMode;
 
-    shiftIndex = this.date.getLong(ChronoField.EPOCH_DAY) * 24 + shiftNum;
+    index = this.date.getLong(ChronoField.EPOCH_DAY) * 24 + dailyIndex;
   }
 
 }

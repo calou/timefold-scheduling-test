@@ -24,7 +24,7 @@ public class Timetable {
     @Getter
     @ProblemFactCollectionProperty
     @ValueRangeProvider
-    private List<Shift> shifts;
+    private List<BeamtimeSlot> beamtimeSlots;
 
     @Getter
     @ProblemFactCollectionProperty
@@ -51,9 +51,9 @@ public class Timetable {
         this.solverStatus = solverStatus;
     }
 
-    public Timetable(String name, List<Shift> shifts, List<Beamline> beamlines, List<Session> sessions) {
+    public Timetable(String name, List<BeamtimeSlot> beamtimeSlots, List<Beamline> beamlines, List<Session> sessions) {
         this.name = name;
-        this.shifts = shifts;
+        this.beamtimeSlots = beamtimeSlots;
         this.beamlines = beamlines;
         this.sessions = sessions;
     }

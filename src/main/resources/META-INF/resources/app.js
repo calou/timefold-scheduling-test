@@ -106,8 +106,8 @@ function sanitizeForId(idPart){
   return idPart.replaceAll("/", "__");
 }
 
-function toHtmlId(shift_id, beamline_id) {
-  return `shift-${sanitizeForId(shift_id)}___beamline-${sanitizeForId(beamline_id)}`;
+function toHtmlId(beamtimeSlot_id, beamline_id) {
+  return `beamtimeSlot-${sanitizeForId(beamtimeSlot_id)}___beamline-${sanitizeForId(beamline_id)}`;
 }
 
 function renderSchedule(timetable) {
@@ -135,14 +135,14 @@ console.log("renderSchedule")
 
   const LocalTime = JSJoda.LocalTime;
 
-  $.each(timetable.shifts, (_, shift) => {
+  $.each(timetable.beamtimeSlots, (_, beamtimeSlot) => {
     const rowByBeamline = $("<tr>").appendTo(tbodyByBeamline);
     rowByBeamline
       .append($(`<th class="align-middle"/>`)
-        .append($("<span/>").text(shift.id + " - " + shift.beamMode.name))
+        .append($("<span/>").text(beamtimeSlot.id + " - " + beamtimeSlot.beamMode.name))
         );
     $.each(timetable.beamlines, (_, beamline) => {
-      rowByBeamline.append($("<td/>").prop("id", toHtmlId(shift.id, beamline.id)));
+      rowByBeamline.append($("<td/>").prop("id", toHtmlId(beamtimeSlot.id, beamline.id)));
     });
 
   });
@@ -152,11 +152,11 @@ console.log("renderSchedule")
     const sessionElement = $(`<div class="card" style="background-color: ${color}"/>`)
       .append($(`<div class="card-body p-2"/>`)
         .append($(`<h5 class="card-title mb-1"/>`).text(session.proposal.finalNumber)));
-    if (session.shift_id == null || session.beamline_id == null) {
+    if (session.beamtimeSlot_id == null || session.beamline_id == null) {
       unassignedSessions.append($(`<div class="col"/>`).append(sessionElement));
     } else {
-      // In the JSON, the session.shift and session.beamline are only IDs of these objects.
-      $(`#${toHtmlId(session.shift_id, session.beamline_id)}`).append(sessionElement.clone());
+      // In the JSON, the session.beamtimeSlot_id and session.beamline are only IDs of these objects.
+      $(`#${toHtmlId(session.beamtimeSlot_id, session.beamline_id)}`).append(sessionElement.clone());
     }
   });
 }
