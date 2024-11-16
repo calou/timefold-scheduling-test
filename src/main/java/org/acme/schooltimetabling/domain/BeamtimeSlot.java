@@ -1,24 +1,21 @@
 package org.acme.schooltimetabling.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 
-import ai.timefold.solver.core.api.domain.lookup.PlanningId;
-import ai.timefold.solver.core.api.domain.variable.PlanningVariable;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
+import ai.timefold.solver.core.api.domain.lookup.PlanningId;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
-@ToString(of = { "date", "startTime" })
+@ToString(of = { "date", "dailyIndex" })
 @NoArgsConstructor
-@JsonIdentityInfo(scope = BeamtimeSlot.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class BeamtimeSlot {
 
   @PlanningId
@@ -42,4 +39,11 @@ public class BeamtimeSlot {
     index = this.date.getLong(ChronoField.EPOCH_DAY) * 24 + dailyIndex;
   }
 
+  public LocalDateTime getStartsAt() {
+    return LocalDateTime.of(date, LocalTime.of(dailyIndex, 0));
+  }
+
+  public LocalDateTime getEndsAt() {
+    return LocalDateTime.of(date, LocalTime.of(dailyIndex, 59));
+  }
 }
