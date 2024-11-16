@@ -5,6 +5,7 @@ let demoDataId = null;
 let scheduleId = null;
 let loadedSchedule = null;
 
+var calendarMap = new Map();
 
 $(document).ready(function () {
   var calendarEl = document.getElementById('calendar');
@@ -58,6 +59,7 @@ $(document).ready(function () {
     $.get("/demo-data", function (data) {
       // load first data set
       demoDataId = data[0];
+
       refreshSchedule();
     }).fail(function (xhr, ajaxOptions, thrownError) {
       // disable this page as there is no data
@@ -66,6 +68,8 @@ $(document).ready(function () {
       $demo.html("<h1><p align=\"center\">No test data available</p></h1>")
     });
   }
+
+  var firstLoad = true;
 
   function refreshSchedule() {
     let path = "/timetables/" + scheduleId;
@@ -80,6 +84,23 @@ $(document).ready(function () {
 
     $.getJSON(path, function (schedule) {
       loadedSchedule = schedule;
+
+      if (firstLoad) {
+        $.each(schedule.beamlines, (_, beamline) => {
+          var calendarDomId = `calendar-${beamline.id}`;
+          $('#calendars').append(`<h2>${beamline.name}</h2><div id="${calendarDomId}"></div>`);
+
+          var calendarEl = document.getElementById(calendarDomId);
+          var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+          });
+          calendar.render();
+          calendar.gotoDate('2024-01-01');
+          calendarMap.set(beamline.id, calendar);
+        });
+        firstLoad = false;
+      }
+
       renderSchedule(schedule);
     })
       .fail(function (xhr, ajaxOptions, thrownError) {
@@ -92,17 +113,25 @@ $(document).ready(function () {
     refreshSolvingButtons(timetable.solverStatus != null && timetable.solverStatus !== "NOT_SOLVING");
     $("#score").text("Score: " + (timetable.score == null ? "?" : timetable.score));
 
-    calendar.removeAllEvents();
-    calendar.batchRendering(function () {
-      $.each(timetable.sessions, (_, session) => {
-        const color = pickColor(session.proposal.finalNumber);
+    calendarMap.forEach((cal, k, map) => {
+      var sessions = timetable.sessions.filter(session => session.beamline === k);
+
+      refreshSessions(cal, sessions)
+    });
+    refreshSessions(calendar, timetable.sessions, false)
+  }
+
+  function refreshSessions(cal, sessions, colorPerProposal = true) {
+    cal.removeAllEvents();
+    cal.batchRendering(function () {
+      $.each(sessions, (_, session) => {
         if (!!session.beamtimeSlot?.startsAt) {
-          calendar.addEvent({
+          cal.addEvent({
             id: session.id,
             title: `${session.beamline} - ${session.proposal.finalNumber}`,
             start: session.beamtimeSlot.startsAt,
             end: session.beamtimeSlot.endsAt,
-            backgroundColor: pickColor(session.beamline)
+            backgroundColor: colorPerProposal ? pickColor(session.proposal.finalNumber) : pickColor(session.beamline)
           });
         }
       });
@@ -161,31 +190,31 @@ $(document).ready(function () {
         scoreAnalysisModalContent.children().remove();
         scoreAnalysisModalContent.text("");
 
-        const analysisTable = $(`<table class="table"/>`).css({ textAlign: 'center' });
-        const analysisTHead = $(`<thead/>`).append($(`<tr/>`)
-          .append($(`<th></th>`))
-          .append($(`<th>Constraint</th>`).css({ textAlign: 'left' }))
-          .append($(`<th>Type</th>`))
-          .append($(`<th># Matches</th>`))
-          .append($(`<th>Weight</th>`))
-          .append($(`<th>Score</th>`))
-          .append($(`<th></th>`)));
+        const analysisTable = $(`< table class= "table" /> `).css({ textAlign: 'center' });
+        const analysisTHead = $(`< thead /> `).append($(` < tr /> `)
+          .append($(`< th ></th > `))
+          .append($(`< th > Constraint</th > `).css({ textAlign: 'left' }))
+          .append($(`< th > Type</th > `))
+          .append($(`< th ># Matches</th > `))
+          .append($(`< th > Weight</th > `))
+          .append($(`< th > Score</th > `))
+          .append($(`< th ></th > `)));
         analysisTable.append(analysisTHead);
-        const analysisTBody = $(`<tbody/>`)
+        const analysisTBody = $(`< tbody /> `)
         $.each(scoreAnalysis.constraints, (index, constraintAnalysis) => {
           let icon = constraintAnalysis.type == "hard" && constraintAnalysis.implicitScore < 0 ? '<span class="fas fa-exclamation-triangle" style="color: red"></span>' : '';
           if (!icon) icon = constraintAnalysis.weight < 0 && constraintAnalysis.matches.length == 0 ? '<span class="fas fa-check-circle" style="color: green"></span>' : '';
 
-          let row = $(`<tr/>`);
-          row.append($(`<td/>`).html(icon))
-            .append($(`<td/>`).text(constraintAnalysis.name).css({ textAlign: 'left' }))
-            .append($(`<td/>`).text(constraintAnalysis.type))
-            .append($(`<td/>`).html(`<b>${constraintAnalysis.matches.length}</b>`))
-            .append($(`<td/>`).text(constraintAnalysis.weight))
-            .append($(`<td/>`).text(constraintAnalysis.implicitScore));
+          let row = $(`< tr /> `);
+          row.append($(`< td /> `).html(icon))
+            .append($(`< td /> `).text(constraintAnalysis.name).css({ textAlign: 'left' }))
+            .append($(`< td /> `).text(constraintAnalysis.type))
+            .append($(`< td /> `).html(` < b > ${constraintAnalysis.matches.length}</b > `))
+            .append($(`< td /> `).text(constraintAnalysis.weight))
+            .append($(`< td /> `).text(constraintAnalysis.implicitScore));
 
           analysisTBody.append(row);
-          row.append($(`<td/>`));
+          row.append($(`< td /> `));
         });
         analysisTable.append(analysisTBody);
         scoreAnalysisModalContent.append(analysisTable);
