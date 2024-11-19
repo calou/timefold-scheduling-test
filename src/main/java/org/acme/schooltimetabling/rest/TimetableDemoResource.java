@@ -61,9 +61,13 @@ public class TimetableDemoResource {
     var localContactCandidates = new ArrayList<LocalContact>();
 
     var paul = new StaffMember("Paul");
+    var peter = new StaffMember("Peter");
+    var prya = new StaffMember("Peter");
     var georges = new StaffMember("Georges");
+    var gwendolin = new StaffMember("Gwendolin");
+    var guenievre = new StaffMember("Guenievre");
     var camille = new StaffMember("Camille");
-    var etienne = new StaffMember("Etienne");
+    var charles = new StaffMember("Charles");
 
 
 
@@ -93,11 +97,15 @@ public class TimetableDemoResource {
     beamlines.add(new Beamline("CM01"));
 
     localContactCandidates.add(new LocalContact(beamlines.get(0), paul));
-    localContactCandidates.add(new LocalContact(beamlines.get(1), paul));
+    localContactCandidates.add(new LocalContact(beamlines.get(0), peter));
+    localContactCandidates.add(new LocalContact(beamlines.get(0), prya));
+
     localContactCandidates.add(new LocalContact(beamlines.get(1), georges));
-    localContactCandidates.add(new LocalContact(beamlines.get(2), georges));
+    localContactCandidates.add(new LocalContact(beamlines.get(1), gwendolin));
+    localContactCandidates.add(new LocalContact(beamlines.get(1), guenievre));
+
     localContactCandidates.add(new LocalContact(beamlines.get(2), camille));
-    localContactCandidates.add(new LocalContact(beamlines.get(2), etienne));
+    localContactCandidates.add(new LocalContact(beamlines.get(2), charles));
 
     List<Session> sessions = new ArrayList<>();
 
@@ -130,7 +138,7 @@ public class TimetableDemoResource {
     Map.of("MX-1234", new RequestedBeamline(beamline1, 25),
            "STD-0001", new RequestedBeamline(beamline1, 12),
            "LT-0101", new RequestedBeamline(beamline1, 16),
-           "IN-666", new RequestedBeamline(beamline1, 3)
+           "IN-452", new RequestedBeamline(beamline1, 3)
        )
        .forEach(singleBunchSessionCreate);
 

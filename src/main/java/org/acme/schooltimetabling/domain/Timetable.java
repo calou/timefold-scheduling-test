@@ -8,6 +8,7 @@ import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
 import ai.timefold.solver.core.api.domain.solution.ProblemFactCollectionProperty;
 import ai.timefold.solver.core.api.domain.valuerange.ValueRangeProvider;
 import ai.timefold.solver.core.api.score.buildin.hardsoft.HardSoftScore;
+import ai.timefold.solver.core.api.score.buildin.hardsoftbigdecimal.HardSoftBigDecimalScore;
 import ai.timefold.solver.core.api.solver.SolverStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,12 +38,17 @@ public class Timetable {
   private List<LocalContact> localContacts;
 
   @Getter
+  @ProblemFactCollectionProperty
+  @ValueRangeProvider
+  private List<StaffMember> staffMembers;
+
+  @Getter
   @PlanningEntityCollectionProperty
   private List<Session> sessions;
 
   @Getter
   @PlanningScore
-  private HardSoftScore score;
+  private HardSoftBigDecimalScore score;
 
 
   @Getter
@@ -50,7 +56,7 @@ public class Timetable {
   // Ignored by Timefold, used by the UI to display solve or stop solving button
   private SolverStatus solverStatus;
 
-  public Timetable(String name, HardSoftScore score, SolverStatus solverStatus) {
+  public Timetable(String name, HardSoftBigDecimalScore score, SolverStatus solverStatus) {
     this.name = name;
     this.score = score;
     this.solverStatus = solverStatus;
@@ -66,6 +72,10 @@ public class Timetable {
     this.beamlines = beamlines;
     this.sessions = sessions;
     this.localContacts = localContacts;
+    this.staffMembers = localContacts.stream()
+                                     .map(LocalContact::getStaffMember)
+                                     .distinct()
+                                     .toList();
   }
 
 }
