@@ -15,15 +15,9 @@ $(document).ready(function () {
   calendar.render();
   calendar.gotoDate('2024-01-01');
 
-  $("#solveButton").click(function () {
-    solve();
-  });
-  $("#stopSolvingButton").click(function () {
-    stopSolving();
-  });
-  $("#analyzeButton").click(function () {
-    analyze();
-  });
+  $("#solveButton").click(() => solve());
+  $("#stopSolvingButton").click(() => stopSolving());
+  $("#analyzeButton").click(() => analyze());
 
   setupAjax();
   fetchDemoData();

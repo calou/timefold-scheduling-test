@@ -4,12 +4,14 @@ import ai.timefold.solver.core.api.domain.lookup.PlanningId;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(of = {"id"})
 @ToString(of = { "id" })
 @NoArgsConstructor
 @JsonIdentityInfo(scope = Beamline.class, generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")

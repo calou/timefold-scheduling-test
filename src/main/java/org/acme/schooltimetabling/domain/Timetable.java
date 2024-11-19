@@ -48,7 +48,7 @@ public class Timetable {
 
   @Getter
   @PlanningScore
-  private HardSoftBigDecimalScore score;
+  private HardSoftScore score;
 
 
   @Getter
@@ -56,7 +56,7 @@ public class Timetable {
   // Ignored by Timefold, used by the UI to display solve or stop solving button
   private SolverStatus solverStatus;
 
-  public Timetable(String name, HardSoftBigDecimalScore score, SolverStatus solverStatus) {
+  public Timetable(String name, HardSoftScore score, SolverStatus solverStatus) {
     this.name = name;
     this.score = score;
     this.solverStatus = solverStatus;

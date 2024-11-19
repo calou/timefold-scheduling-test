@@ -1,16 +1,16 @@
 package org.acme.schooltimetabling.solver;
 
-import ai.timefold.solver.core.api.score.buildin.hardsoftbigdecimal.HardSoftBigDecimalScore;
+import ai.timefold.solver.core.api.score.buildin.hardsoft.HardSoftScore;
 import ai.timefold.solver.core.api.score.stream.Constraint;
 import ai.timefold.solver.core.api.score.stream.ConstraintCollectors;
 import ai.timefold.solver.core.api.score.stream.ConstraintFactory;
 import ai.timefold.solver.core.api.score.stream.ConstraintProvider;
 import ai.timefold.solver.core.api.score.stream.Joiners;
-import ai.timefold.solver.core.api.score.stream.common.LoadBalance;
-import org.acme.schooltimetabling.domain.LocalContact;
 import org.acme.schooltimetabling.domain.Session;
+import org.acme.schooltimetabling.domain.StaffMember;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 import static ai.timefold.solver.core.api.score.stream.ConstraintCollectors.count;
 
@@ -25,14 +25,16 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         beamModeConflict(constraintFactory),
         proposalUnacceptableDates(constraintFactory),
         localContactBeamlineConflict(constraintFactory),
-        localBeamlineUnicityConflict(constraintFactory),
+        //localBeamlineUnicityConflict(constraintFactory),
         fairLocalContactAssignments(constraintFactory),
+        preventLocalContactWithoutAnyAssignment(constraintFactory),
 
         // Soft constraints
         consecutiveProposalSession(constraintFactory),
         proposalSessionProximity(constraintFactory),
-        maxTenSlotsPerLocalContactAssignments(constraintFactory),
-        proposalPreferredDatesConstraint(constraintFactory)
+        //maxTenSlotsPerLocalContactAssignments(constraintFactory),
+        proposalPreferredDatesConstraint(constraintFactory),
+        localContactSessionProximity(constraintFactory)
     };
   }
 
@@ -46,7 +48,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                            // ... on the same beamline ...
                            Joiners.equal(Session::getBeamline))
         // ... and penalize each pair with a hard weight.
-        .penalize(HardSoftBigDecimalScore.ONE_HARD)
+        .penalize(HardSoftScore.ONE_HARD)
         .asConstraint("Beamline conflict");
   }
 
@@ -57,7 +59,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                                    .getBeamMode()
                                    .equals(session.getProposal()
                                                   .getBeamMode()))
-        .penalize(HardSoftBigDecimalScore.ONE_HARD)
+        .penalize(HardSoftScore.ONE_HARD)
         .asConstraint("Session mode");
   }
 
@@ -69,7 +71,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                                    .getId()
                                    .equals(session.getBeamline()
                                                   .getId()))
-        .penalize(HardSoftBigDecimalScore.ONE_HARD)
+        .penalize(HardSoftScore.ONE_HARD)
         .asConstraint("Local contact beamline");
   }
 
@@ -81,25 +83,40 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                            // ... on the same beamline ...
                            Joiners.equal(session -> session.getLocalContact()
                                                            .getStaffMember()))
-        .penalize(HardSoftBigDecimalScore.ONE_HARD)
+        .penalize(HardSoftScore.ONE_HARD)
         .asConstraint("Local contact unicity beamline");
   }
 
   Constraint fairLocalContactAssignments(ConstraintFactory constraintFactory) {
-    return constraintFactory.forEach(LocalContact.class)
-                            .groupBy(ConstraintCollectors.loadBalance(LocalContact::getStaffMember))
-                            .penalizeBigDecimal(HardSoftBigDecimalScore.ONE_SOFT, LoadBalance::unfairness)
+    return constraintFactory.forEach(Session.class)
+                            .groupBy(ConstraintCollectors.loadBalance(session -> session.getLocalContact()
+                                                                                        .getStaffMember()))
+                            .penalize(HardSoftScore.ONE_SOFT,
+                                                balance -> balance.unfairness().intValue())
                             .asConstraint("fair local contact assignments");
   }
 
   Constraint maxTenSlotsPerLocalContactAssignments(ConstraintFactory constraintFactory) {
     return constraintFactory.forEach(Session.class)
-                                .groupBy(
-                                    session -> session.getLocalContact().getStaffMember(),
-                                    session -> session.getBeamtimeSlot().getDate(),
-                                    count())
-                            .penalize(HardSoftBigDecimalScore.ONE_SOFT, ((staffMember, date, count) -> count > 10 ? 1 : 0))
+                            .groupBy(
+                                session -> session.getLocalContact()
+                                                  .getStaffMember(),
+                                session -> session.getBeamtimeSlot()
+                                                  .getDate(),
+                                count())
+                            .filter((staffMember, localDate, count) -> count > 10)
+                            .penalize(HardSoftScore.ONE_HARD)
                             .asConstraint("Max 10 slots per LocalContact per day");
+  }
+
+  Constraint preventLocalContactWithoutAnyAssignment(ConstraintFactory constraintFactory) {
+    return constraintFactory.forEach(StaffMember.class)
+                            .ifNotExists(Session.class,
+                                         Joiners.filtering((staffMember, session) -> session.getLocalContact()
+                                                                                            .getStaffMember()
+                                                                                            .equals(staffMember)))
+                            .penalize(HardSoftScore.ONE_HARD)
+                            .asConstraint("prevent localContact without any assignment");
   }
 
   Constraint proposalUnacceptableDates(ConstraintFactory constraintFactory) {
@@ -107,7 +124,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         .forEach(Session.class)
         .filter(this::isSessionWithDatePrefs)
         .filter(this::isSessionDateUnacceptable)
-        .penalize(HardSoftBigDecimalScore.ONE_HARD)
+        .penalize(HardSoftScore.ONE_HARD)
         .asConstraint("Proposal unacceptable dates");
   }
 
@@ -116,7 +133,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         .forEach(Session.class)
         .filter(this::isSessionWithDatePrefs)
         .filter(this::isSessionDatePreferred)
-        .reward(HardSoftBigDecimalScore.of(BigDecimal.ZERO, BigDecimal.valueOf(3L)))
+        .reward(HardSoftScore.ofSoft(3))
         .asConstraint("Proposal preferred dates");
   }
 
@@ -127,38 +144,52 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         .forEachUniquePair(Session.class,
                            Joiners.equal(Session::getBeamtimeSlot),
                            Joiners.equal(Session::getProposal))
-        .penalize(HardSoftBigDecimalScore.ONE_HARD)
+        .penalize(HardSoftScore.ONE_HARD)
         .asConstraint("proposal single session conflict");
   }
 
   // Consecutive sessions are preferred for a given proposal
   Constraint consecutiveProposalSession(ConstraintFactory constraintFactory) {
     return constraintFactory
-        .forEach(Session.class)
-        .join(Session.class, Joiners.equal(Session::getProposal)
-        )
+        .forEachUniquePair(Session.class,
+                           Joiners.equal(Session::getProposal))
         .filter((session1, session2) -> {
           var indexDiff = session2.getBeamtimeSlot()
                                   .getIndex() - session1.getBeamtimeSlot()
                                                         .getIndex();
           return Math.abs(indexDiff) == 1l;
         })
-        .reward(HardSoftBigDecimalScore.ONE_SOFT)
+        .reward(HardSoftScore.ONE_SOFT)
         .asConstraint("Consecutive proposal sessions");
   }
 
 
   Constraint proposalSessionProximity(ConstraintFactory constraintFactory) {
-    return constraintFactory
-        .forEach(Session.class)
+    return constraintFactory.forEach(Session.class)
         .join(Session.class, Joiners.equal(Session::getProposal))
-        .impact(HardSoftBigDecimalScore.ONE_SOFT, (session1, session2) -> {
+        .impact(HardSoftScore.ONE_SOFT, (session1, session2) -> {
           var indexDiff = session2.getBeamtimeSlot()
                                   .getIndex() - session1.getBeamtimeSlot()
                                                         .getIndex();
           return (int) (-1 * Math.abs(indexDiff / 3));
         })
         .asConstraint("Proposal session proximity");
+  }
+
+
+  Constraint localContactSessionProximity(ConstraintFactory constraintFactory) {
+    return constraintFactory
+        .forEachUniquePair(Session.class,
+                           Joiners.equal(Session::getBeamline),
+                           Joiners.equal(session -> session.getLocalContact().getStaffMember()))
+        .filter((session1, session2) -> {
+          var indexDiff = session2.getBeamtimeSlot()
+                                  .getIndex() - session1.getBeamtimeSlot()
+                                                        .getIndex();
+          return Math.abs(indexDiff) == 1l;
+        })
+        .reward(HardSoftScore.ONE_SOFT)
+        .asConstraint("local contact session proximity");
   }
 
     /*
@@ -175,7 +206,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                                                         session2.getShift().getStartTime());
                     return !between.isNegative() && between.compareTo(Duration.ofMinutes(30)) <= 0;
                 })
-                .penalize(HardSoftBigDecimalScore.ONE_SOFT)
+                .penalize(HardSoftScore.ONE_SOFT)
                 .asConstraint("Student group subject variety");
     }
 

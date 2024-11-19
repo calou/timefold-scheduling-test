@@ -62,7 +62,7 @@ public class TimetableDemoResource {
 
     var paul = new StaffMember("Paul");
     var peter = new StaffMember("Peter");
-    var prya = new StaffMember("Peter");
+    var prya = new StaffMember("Prya");
     var georges = new StaffMember("Georges");
     var gwendolin = new StaffMember("Gwendolin");
     var guenievre = new StaffMember("Guenievre");

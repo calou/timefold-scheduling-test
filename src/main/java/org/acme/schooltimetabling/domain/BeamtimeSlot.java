@@ -10,11 +10,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import ai.timefold.solver.core.api.domain.lookup.PlanningId;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
-@ToString(of = { "date", "dailyIndex" })
+@EqualsAndHashCode(of = {"id"})
+@ToString(of = { "date", "hour" })
 @NoArgsConstructor
 public class BeamtimeSlot {
 
@@ -23,27 +25,27 @@ public class BeamtimeSlot {
 
   private LocalDate date;
 
-  private int dailyIndex;
+  private int hour;
 
   private BeamMode beamMode;
 
   @JsonIgnore
   private long index;
 
-  public BeamtimeSlot(LocalDate date, int dailyIndex, BeamMode beamMode) {
-    this.id = "%1$s/%2$s".formatted(date.format(DateTimeFormatter.ISO_DATE), dailyIndex);
+  public BeamtimeSlot(LocalDate date, int hour, BeamMode beamMode) {
+    this.id = "%1$s/%2$s".formatted(date.format(DateTimeFormatter.ISO_DATE), hour);
     this.date = date;
-    this.dailyIndex = dailyIndex;
+    this.hour = hour;
     this.beamMode = beamMode;
 
-    index = this.date.getLong(ChronoField.EPOCH_DAY) * 24 + dailyIndex;
+    index = this.date.getLong(ChronoField.EPOCH_DAY) * 24 + hour;
   }
 
   public LocalDateTime getStartsAt() {
-    return LocalDateTime.of(date, LocalTime.of(dailyIndex, 0));
+    return LocalDateTime.of(date, LocalTime.of(hour, 0));
   }
 
   public LocalDateTime getEndsAt() {
-    return LocalDateTime.of(date, LocalTime.of(dailyIndex, 59));
+    return LocalDateTime.of(date, LocalTime.of(hour, 59));
   }
 }
