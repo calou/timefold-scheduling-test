@@ -128,7 +128,7 @@ $(document).ready(function () {
         if (!!session.beamtimeSlot?.startsAt) {
           cal.addEvent({
             id: session.id,
-            title: `${session.beamline} - ${session.proposal.finalNumber}`,
+            title: `${session.beamline} - ${session.proposal.finalNumber} - ${session.localContact?.staffMember?.name}`,
             start: session.beamtimeSlot.startsAt,
             end: session.beamtimeSlot.endsAt,
             backgroundColor: colorPerProposal ? pickColor(session.proposal.finalNumber) : pickColor(session.beamline)

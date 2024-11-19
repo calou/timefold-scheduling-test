@@ -34,15 +34,11 @@ public class Timetable {
   @Getter
   @ProblemFactCollectionProperty
   @ValueRangeProvider
-  private List<LocalContactCandidate> localContactCandidates;
+  private List<LocalContact> localContacts;
 
   @Getter
   @PlanningEntityCollectionProperty
   private List<Session> sessions;
-
-  @Getter
-  @PlanningEntityCollectionProperty
-  private List<LocalContactAssignment> localContactAssignments;
 
   @Getter
   @PlanningScore
@@ -64,14 +60,12 @@ public class Timetable {
                    List<BeamtimeSlot> beamtimeSlots,
                    List<Beamline> beamlines,
                    List<Session> sessions,
-                   List<LocalContactCandidate> localContactCandidates,
-                   List<LocalContactAssignment> localContactAssignments) {
+                   List<LocalContact> localContacts) {
     this.name = name;
     this.beamtimeSlots = beamtimeSlots;
     this.beamlines = beamlines;
     this.sessions = sessions;
-    this.localContactCandidates = localContactCandidates;
-    this.localContactAssignments = localContactAssignments;
+    this.localContacts = localContacts;
   }
 
 }

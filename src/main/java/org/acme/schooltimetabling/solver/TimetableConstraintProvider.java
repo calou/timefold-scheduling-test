@@ -17,13 +17,13 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         proposalConflict(constraintFactory),
         beamModeConflict(constraintFactory),
         proposalUnacceptableDates(constraintFactory),
-        //studentGroupConflict(constraintFactory),
+        localContactBeamlineConflict(constraintFactory),
+        localBeamlineUnicityConflict(constraintFactory),
+
         // Soft constraints
-        //teacherBeamlineStability(constraintFactory),
         consecutiveProposalSession(constraintFactory),
         proposalSessionProximity(constraintFactory),
         proposalPreferredDatesConstraint(constraintFactory)
-        //studentGroupSubjectVariety(constraintFactory)
     };
   }
 
@@ -50,6 +50,26 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                                                   .getBeamMode()))
         .penalize(HardSoftScore.ONE_HARD)
         .asConstraint("Session mode");
+  }
+
+  Constraint localContactBeamlineConflict(ConstraintFactory constraintFactory) {
+    return constraintFactory
+        .forEach(Session.class)
+        .filter(session -> !session.getLocalContact().getBeamline().getId()
+                                   .equals(session.getBeamline().getId()))
+        .penalize(HardSoftScore.ONE_HARD)
+        .asConstraint("Local contact beamline");
+  }
+
+  Constraint localBeamlineUnicityConflict(ConstraintFactory constraintFactory) {
+    return constraintFactory
+        .forEachUniquePair(Session.class,
+                            // ... in the same shifts ...
+                            Joiners.equal(Session::getBeamtimeSlot),
+                            // ... on the same beamline ...
+                            Joiners.equal(session -> session.getLocalContact().getStaffMember()))
+        .penalize(HardSoftScore.ONE_HARD)
+        .asConstraint("Local contact unicity beamline");
   }
 
   Constraint proposalUnacceptableDates(ConstraintFactory constraintFactory) {

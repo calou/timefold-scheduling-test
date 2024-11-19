@@ -14,8 +14,7 @@ import jakarta.ws.rs.core.Response;
 
 import org.acme.schooltimetabling.domain.BeamMode;
 import org.acme.schooltimetabling.domain.DatePreference;
-import org.acme.schooltimetabling.domain.LocalContactAssignment;
-import org.acme.schooltimetabling.domain.LocalContactCandidate;
+import org.acme.schooltimetabling.domain.LocalContact;
 import org.acme.schooltimetabling.domain.Proposal;
 import org.acme.schooltimetabling.domain.Session;
 import org.acme.schooltimetabling.domain.Beamline;
@@ -59,11 +58,12 @@ public class TimetableDemoResource {
   @Path("/{demoDataId}")
   public Response generate(@Parameter(description = "Unique identifier of the demo data.",
                                       required = true) @PathParam("demoDataId") DemoData demoData) {
-    var localContactAssignments = new ArrayList<LocalContactAssignment>(300);
-    var localContactCandidates = new ArrayList<LocalContactCandidate>();
+    var localContactCandidates = new ArrayList<LocalContact>();
 
     var paul = new StaffMember("Paul");
     var georges = new StaffMember("Georges");
+    var camille = new StaffMember("Camille");
+    var etienne = new StaffMember("Etienne");
 
 
 
@@ -92,16 +92,12 @@ public class TimetableDemoResource {
     beamlines.add(new Beamline("ID22"));
     beamlines.add(new Beamline("CM01"));
 
-    localContactCandidates.add(new LocalContactCandidate(beamlines.get(0), paul));
-    localContactCandidates.add(new LocalContactCandidate(beamlines.get(1), paul));
-    localContactCandidates.add(new LocalContactCandidate(beamlines.get(1), georges));
-    localContactCandidates.add(new LocalContactCandidate(beamlines.get(2), georges));
-
-    for (BeamtimeSlot beamtimeSlot : beamtimeSlots) {
-      for (Beamline beamline : beamlines) {
-        localContactAssignments.add(new LocalContactAssignment(beamtimeSlot, beamline));
-      }
-    }
+    localContactCandidates.add(new LocalContact(beamlines.get(0), paul));
+    localContactCandidates.add(new LocalContact(beamlines.get(1), paul));
+    localContactCandidates.add(new LocalContact(beamlines.get(1), georges));
+    localContactCandidates.add(new LocalContact(beamlines.get(2), georges));
+    localContactCandidates.add(new LocalContact(beamlines.get(2), camille));
+    localContactCandidates.add(new LocalContact(beamlines.get(2), etienne));
 
     List<Session> sessions = new ArrayList<>();
 
@@ -168,8 +164,7 @@ public class TimetableDemoResource {
                        beamtimeSlots,
                        beamlines,
                        sessions,
-                       localContactCandidates,
-                       localContactAssignments)
+                       localContactCandidates)
                    )
                    .build();
   }

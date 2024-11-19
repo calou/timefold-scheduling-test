@@ -23,6 +23,9 @@ public class Session {
   @PlanningVariable
   private BeamtimeSlot beamtimeSlot;
 
+  @PlanningVariable
+  private LocalContact localContact;
+
   private Beamline beamline;
 
   public Session(Proposal proposal, Beamline beamline) {
