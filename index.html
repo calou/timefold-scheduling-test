@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Title</title>
+  <meta charset="utf-8">
+  <style>
+    @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+    @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+    @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+    body {
+      font-family: 'Droid Serif';
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Yanone Kaffeesatz';
+      font-weight: normal;
+    }
+
+    .remark-code,
+    .remark-inline-code {
+      font-family: 'Ubuntu Mono';
+    }
+  </style>
+</head>
+
+<body>
+  <textarea id="source">
+
+  class: center, middle
+
+  # Solving planning problems with Timefold
+
+  ---
+
+  # What problems are we trying to solve ?
+
+  Planning problems:
+  - Involves resources
+  - Subject to constraints
+  - Has a goal to achieve
+
+  ---
+
+  # What is a .... ? (1/2)
+
+  ### Resource
+  - Objects or people whose quantity is limited in the context of the problem
+  - Examples:
+    - employees that can be affected to a shift
+    - a room / beamline
+    - ...
+
+  ### Constraint
+  - a rule that limits/discourage... the use/availability... of a resource
+  - Examples:
+    - a person can not be at two places at the same time
+    - a delivery truck can not be loaded above its maximum capacity
+    - ...
+
+  ---
+
+  # What is a .... ? (2/2)
+
+  ### Goal
+  - the reason we are solving the problem
+  - Examples:
+    - Maximize profit...
+    - Deliver all packages as fast as possible
+    - ...
+
+  ---
+
+  # All constraints are not born equal!
+
+  ### Hard constraint
+  A constraint that must be satisfied for the solution to be feasible.
+
+  ### Soft constraint
+  It would be nice to satisfy soft constraints but they will not affect the feasibility of the solution (only its desirability ). 
+
+
+  ---
+
+  # Let's play 
+
+  To run the application: 
+
+  ``` shell
+      mvn quarkus:dev
+  ```
+
+  ---
+
+  # Conclusion
+
+  ## Importance of the definitions of the goal(s) and constraints 
+
+  ## Importance of the structure of the models 
+
+  ## ...
+
+
+  </textarea>
+  <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+  </script>
+  <script>
+    var slideshow = remark.create();
+  </script>
+</body>
+
+</html>
