@@ -25,14 +25,12 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         beamModeConflict(constraintFactory),
         proposalUnacceptableDates(constraintFactory),
         localContactBeamlineConflict(constraintFactory),
-        //localBeamlineUnicityConflict(constraintFactory),
         fairLocalContactAssignments(constraintFactory),
         preventLocalContactWithoutAnyAssignment(constraintFactory),
 
         // Soft constraints
         consecutiveProposalSession(constraintFactory),
         proposalSessionProximity(constraintFactory),
-        //maxTenSlotsPerLocalContactAssignments(constraintFactory),
         proposalPreferredDatesConstraint(constraintFactory),
         localContactSessionProximity(constraintFactory)
     };
@@ -75,17 +73,6 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         .asConstraint("Local contact beamline");
   }
 
-  Constraint localBeamlineUnicityConflict(ConstraintFactory constraintFactory) {
-    return constraintFactory
-        .forEachUniquePair(Session.class,
-                           // ... in the same shifts ...
-                           Joiners.equal(Session::getBeamtimeSlot),
-                           // ... on the same beamline ...
-                           Joiners.equal(session -> session.getLocalContact()
-                                                           .getStaffMember()))
-        .penalize(HardSoftScore.ONE_HARD)
-        .asConstraint("Local contact unicity beamline");
-  }
 
   Constraint fairLocalContactAssignments(ConstraintFactory constraintFactory) {
     return constraintFactory.forEach(Session.class)
@@ -94,19 +81,6 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                             .penalize(HardSoftScore.ONE_SOFT,
                                                 balance -> balance.unfairness().intValue())
                             .asConstraint("fair local contact assignments");
-  }
-
-  Constraint maxTenSlotsPerLocalContactAssignments(ConstraintFactory constraintFactory) {
-    return constraintFactory.forEach(Session.class)
-                            .groupBy(
-                                session -> session.getLocalContact()
-                                                  .getStaffMember(),
-                                session -> session.getBeamtimeSlot()
-                                                  .getDate(),
-                                count())
-                            .filter((staffMember, localDate, count) -> count > 10)
-                            .penalize(HardSoftScore.ONE_HARD)
-                            .asConstraint("Max 10 slots per LocalContact per day");
   }
 
   Constraint preventLocalContactWithoutAnyAssignment(ConstraintFactory constraintFactory) {
@@ -175,8 +149,7 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         })
         .asConstraint("Proposal session proximity");
   }
-
-
+  
   Constraint localContactSessionProximity(ConstraintFactory constraintFactory) {
     return constraintFactory
         .forEachUniquePair(Session.class,
@@ -191,27 +164,6 @@ public class TimetableConstraintProvider implements ConstraintProvider {
         .reward(HardSoftScore.ONE_SOFT)
         .asConstraint("local contact session proximity");
   }
-
-    /*
-    Constraint studentGroupSubjectVariety(ConstraintFactory constraintFactory) {
-        // A student group dislikes sequential lessons on the same subject.
-        return constraintFactory
-                .forEach(Session.class)
-                .join(Session.class,
-                      Joiners.equal(Session::getSubject),
-                      Joiners.equal(Session::getStudentGroup),
-                      Joiners.equal((session) -> session.getShift().getDate()))
-                .filter((session1, session2) -> {
-                    Duration between = Duration.between(session1.getShift().getEndTime(),
-                                                        session2.getShift().getStartTime());
-                    return !between.isNegative() && between.compareTo(Duration.ofMinutes(30)) <= 0;
-                })
-                .penalize(HardSoftScore.ONE_SOFT)
-                .asConstraint("Student group subject variety");
-    }
-
-     */
-
 
   private boolean isSessionWithDatePrefs(Session session) {
     return session.getProposal()
